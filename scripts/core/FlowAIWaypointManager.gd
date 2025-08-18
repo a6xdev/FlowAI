@@ -2,11 +2,13 @@
 extends Node
 class_name FlowAIPedestrianWaypointManager
 
-var waypoints:Array[FlowAIPedestrianWaypoint]
+@export var waypoints:Array[FlowAIPedestrianWaypoint]
 
 var waypoints_node_root := Node3D.new()
 var navigation_mesh_node := NavigationRegion3D.new()
 var mesh_instance_node := MeshInstance3D.new()
+
+var get_children_nodes:Array = []
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
@@ -64,6 +66,41 @@ func remove_waypoint(w_selected:FlowAIPedestrianWaypoint) -> void:
 		w_selected.previous_waypoint.next_waypoints.erase(w_selected)
 	waypoints.erase(w_selected)
 	w_selected.queue_free()
+	
+func generate_mesh() -> void:
+	var surface_tool = SurfaceTool.new()
+	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	
+	var right_vectors := {}
+	var dir:Vector3
+	
+	for waypoint in waypoints:
+		for next_waypoint in waypoint.next_waypoints:
+			if next_waypoint == null:
+				continue
+			
+			var seg_dir = (next_waypoint.global_position - waypoint.global_position).normalized()
+			var seg_right = seg_dir.cross(Vector3.UP).normalized()
+
+			var a_left = waypoint.global_position - seg_right * (waypoint.mesh_width * 0.5)
+			var a_right_pos = waypoint.global_position + seg_right * (waypoint.mesh_width * 0.5)
+
+			var b_left = next_waypoint.global_position - seg_right * (next_waypoint.mesh_width * 0.5)
+			var b_right_pos = next_waypoint.global_position + seg_right * (next_waypoint.mesh_width * 0.5)
+			
+			surface_tool.add_vertex(a_left)
+			surface_tool.add_vertex(b_left)
+			surface_tool.add_vertex(b_right_pos)
+
+			surface_tool.add_vertex(a_left)
+			surface_tool.add_vertex(b_right_pos)
+			surface_tool.add_vertex(a_right_pos)
+	
+	surface_tool.generate_normals()
+	var mesh_result = surface_tool.commit()
+	mesh_instance_node.mesh = mesh_result
+	navigation_mesh_node.bake_navigation_mesh()
+			
 #endregion CALLS
 
 #region SIGNALS
