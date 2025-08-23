@@ -4,29 +4,38 @@ class_name FlowAIPedestrianWaypointManager
 
 @export var waypoints:Array[FlowAIPedestrianWaypoint]
 
-var waypoints_node_root := Node3D.new()
-var navigation_mesh_node := NavigationRegion3D.new()
-var mesh_instance_node := MeshInstance3D.new()
+var waypoints_node_root:Node3D = null
+var navigation_mesh_node:NavigationRegion3D = null
+var mesh_instance_node:MeshInstance3D = null
 
 var get_children_nodes:Array = []
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
 	add_to_group("FlowAIPedestrianWaypoint")
+
+	waypoints_node_root = find_child_of_type(Node3D, self)
+	if waypoints_node_root == null:
+		waypoints_node_root = Node3D.new()
+		waypoints_node_root.name = "Waypoints"
+		add_child(waypoints_node_root)
+		waypoints_node_root.owner = get_tree().edited_scene_root
 	
-	waypoints_node_root.name = "Waypoints"
-	navigation_mesh_node.name = "NavigationMesh"
-	mesh_instance_node.name = "Mesh"
+	navigation_mesh_node = find_child_of_type(NavigationRegion3D, self)
+	if navigation_mesh_node == null:
+		navigation_mesh_node = NavigationRegion3D.new()
+		navigation_mesh_node.name = "NavigationMesh"
+		navigation_mesh_node.navigation_mesh = NavigationMesh.new()
+		add_child(navigation_mesh_node)
+		navigation_mesh_node.owner = get_tree().edited_scene_root
 	
-	navigation_mesh_node.navigation_mesh = NavigationMesh.new()
+	mesh_instance_node = find_child_of_type(MeshInstance3D, navigation_mesh_node)
+	if mesh_instance_node == null:
+		mesh_instance_node = MeshInstance3D.new()
+		mesh_instance_node.name = "Mesh"
+		navigation_mesh_node.add_child(mesh_instance_node)
+		mesh_instance_node.owner = get_tree().edited_scene_root
 	
-	add_child(waypoints_node_root)
-	add_child(navigation_mesh_node)
-	navigation_mesh_node.add_child(mesh_instance_node)
-	
-	waypoints_node_root.owner = get_tree().edited_scene_root
-	navigation_mesh_node.owner = get_tree().edited_scene_root
-	mesh_instance_node.owner = get_tree().edited_scene_root
 #endregion GODOT FUNCTIONS
 
 #region CALLS
@@ -100,7 +109,12 @@ func generate_mesh() -> void:
 	var mesh_result = surface_tool.commit()
 	mesh_instance_node.mesh = mesh_result
 	navigation_mesh_node.bake_navigation_mesh()
-			
+
+func find_child_of_type(class_ref:Variant, parent:Variant) -> Node:
+	for child in parent.get_children():
+		if is_instance_of(child, class_ref):
+			return child
+	return null
 #endregion CALLS
 
 #region SIGNALS

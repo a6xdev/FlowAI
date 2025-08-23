@@ -64,6 +64,7 @@ func _process(delta: float) -> void:
 func update_plugin_interface_visibility() -> void:
 	var waypoint_manager_visible:bool = current_waypoint_manager != null
 	var waypoint_visible:bool = selected_peds_waypoint != null
+	fa_generate_mesh.visible = waypoint_manager_visible
 	fa_add_waypoint.visible = waypoint_manager_visible
 	fa_add_next_waypoint.visible = waypoint_visible
 	fa_remove_waypoint.visible = waypoint_visible
