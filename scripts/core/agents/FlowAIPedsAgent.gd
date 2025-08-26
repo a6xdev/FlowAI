@@ -68,10 +68,13 @@ func get_next_waypoint_from_path() -> void:
 	path_index += 1
 	if path_index < current_path.size():
 		set_agent_target(current_path[path_index])
+		return
 	else:
 		current_path.clear()
 		path_index = 0
 		is_peds_navigation_finished.emit()
+		generate_path()
+		return
 
 func set_agent_target(target:Vector3) -> void:
 	var new_target = Vector3(target.x, target.y + 0.5, target.z)
