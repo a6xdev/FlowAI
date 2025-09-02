@@ -1,7 +1,7 @@
 extends NavigationAgent3D
 class_name FlowAINavigationPedsAgent3D
 
-@export var agent:NPC = null
+@export var agent:CharacterBody3D = null
 
 var astar := AStar3D.new()
 
