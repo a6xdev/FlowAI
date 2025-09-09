@@ -5,6 +5,8 @@ class_name FlowAIController
 @export var areas:Array[FlowAIAreaNode] = []
 
 #region GODOT FUNCTIONS
+func _ready() -> void:
+	add_to_group("FlowAIController")
 #endregion
 
 #region CALLS
