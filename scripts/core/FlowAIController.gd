@@ -3,6 +3,8 @@ extends Node
 class_name FlowAIController
 
 @export_file("*json") var DataPath = "res://addons/FlowAI/data.json"
+@export var to_build:bool = true
+@export_group("Sla")
 @export var all_areas:Array[FlowAIAreaNode] = []
 @export var all_pathnodes:Array[FlowAIPathNode] = []
 
@@ -18,7 +20,7 @@ func _ready() -> void:
 #endregion
 
 #region CALLS
-func create_area(data:Dictionary = {}) -> void:
+func create_area(data:Dictionary = {}) -> FlowAIAreaNode:
 	var new_area := FlowAIAreaNode.new()
 	
 	add_child(new_area)
@@ -34,13 +36,12 @@ func create_area(data:Dictionary = {}) -> void:
 	else:
 		new_area.ID = all_areas.size() if not all_areas.is_empty() else 1
 		print("Create FlowAIAreaNode")
-		if Engine.is_editor_hint():
-			EditorInterface.edit_node(new_area)
 		
 	new_area.flowAI_controller = self
 	new_area.name = "area_ " + str(new_area.ID)
+	return new_area
 	
-func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null, data:Dictionary = {}) -> void:
+func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null, data:Dictionary = {}) -> FlowAIPathNode:
 	if area_owner == null:
 		return
 	
@@ -71,9 +72,8 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 			new_pathnode.global_position = prev_node.global_position
 		area_owner.area_pathnodes.append(new_pathnode.ID)
 		
-		EditorInterface.edit_node(new_pathnode)
-	
 	new_pathnode.name = "pathnode_" + str(new_pathnode.ID)
+	return new_pathnode
 
 func connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 	if not from.links.has(to.ID):

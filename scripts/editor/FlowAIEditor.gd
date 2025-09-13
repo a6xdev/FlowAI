@@ -29,7 +29,9 @@ func _parse_begin(object):
 			)
 		
 		add_area_btn.pressed.connect(func():
-			object.create_area()
+			var new_area = object.create_area()
+			if Engine.is_editor_hint():
+				EditorInterface.edit_node(new_area)
 		)
 		
 		#add_custom_control(debug_checkbox)
@@ -41,7 +43,9 @@ func _parse_begin(object):
 		var add_pathnode_btn := Button.new()
 		add_pathnode_btn.text = "Add PathNode"
 		add_pathnode_btn.pressed.connect(func():
-			object.flowAI_controller.create_pathnode(object)
+			var new_pathnode = object.flowAI_controller.create_pathnode(object)
+			if Engine.is_editor_hint():
+				EditorInterface.edit_node(new_pathnode)
 			)
 		
 		add_custom_control(add_pathnode_btn)
@@ -77,8 +81,9 @@ func _parse_begin(object):
 				links_list_vertical.add_child(pathnode_label)
 		
 		add_next_pathnode.pressed.connect(func():
-			controller.create_pathnode(area, object, {})
-			return
+			var new_pathnode = controller.create_pathnode(area, object, {})
+			if Engine.is_editor_hint():
+				EditorInterface.edit_node(new_pathnode)
 			)
 		
 		add_custom_control(pathnode_id_label)
