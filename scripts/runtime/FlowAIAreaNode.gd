@@ -1,38 +1,22 @@
+@tool
 extends Node3D
 class_name FlowAIAreaNode
 
-@export var area_resource:AreaNodeData
+@export var ID:int = 0
+@export var area_pathnodes:Array[int] = []
+@export var flowAI_controller:FlowAIController = null
 
-func create_astar() -> AStar3D:
-	if area_resource.area_pathnodes.size() > 0:
-		var new_astar := AStar3D.new()
-		
-		# Add point logic
-		for pathnode_path in area_resource.area_pathnodes:
-			var pathnode:FlowAIPathNode = get_node_or_null(pathnode_path)
-			if pathnode:
-				var id_a:int = pathnode.get_instance_id()
-				new_astar.add_point(id_a, pathnode.global_position)
-				
-		# Connect point logic
-		for pathnode_path in area_resource.area_pathnodes:
-			var pathnode:FlowAIPathNode = get_node_or_null(pathnode_path)
-			var id_a = pathnode.get_instance_id()
-			
-			for neighbor_path in pathnode.pathnode_resource.pathnode_links:
-				var neighbor:FlowAIPathNode = pathnode.get_node_or_null(neighbor_path)
-				var id_b = neighbor.get_instance_id()
-				if not new_astar.are_points_connected(id_a, id_b):
-					new_astar.connect_points(id_a, id_b, true)
-					
-		return new_astar
-	return null
+#region GODOT FUNCTIONS
+func _ready() -> void:
+	tree_exiting.connect(_on_node_tree_exiting)
+#endregion
 
-func get_all_pathnodes() -> Array:
-	var pathnodes:Array[FlowAIPathNode] = []
-	for node_path in area_resource.area_pathnodes:
-		#print(node_path)
-		var node = get_node_or_null(node_path)
-		if node != null:
-			pathnodes.append(node)
-	return pathnodes
+#region CALLS
+#endregion
+
+#region SIGNALS
+func _on_node_tree_exiting():
+	if flowAI_controller.all_areas.has(self):
+		flowAI_controller.all_areas.erase(self)
+		print("area removed")
+#endregion

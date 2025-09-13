@@ -2,12 +2,22 @@
 extends Marker3D
 class_name FlowAIPathNode
 
-@export var pathnode_resource:PathNodeData
+@export var active:bool = true
+
+@export var ID:int = 0
+@export var areaID:int = 0
+@export var prev_pathnode:int = 0
+@export var links:Array[int] = []
+
+@export var flowAI_controller:FlowAIController = null
 
 var linked_lines_mesh:MeshInstance3D = null
 var pn_mesh:MeshInstance3D = null
 var pn_material:StandardMaterial3D = null
 var line_mesh:ImmediateMesh = null
+
+func _ready() -> void:
+	tree_exiting.connect(_on_node_tree_exiting)
 
 func _enter_tree() -> void:
 	var mesh := BoxMesh.new()
@@ -29,18 +39,17 @@ func _exit_tree() -> void:
 	linked_lines_mesh.queue_free()
 	pn_material = null
 
-func show_links():
-	if not pathnode_resource.pathnode_links.is_empty():
-		line_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
-		for nodepath in pathnode_resource.pathnode_links:
-			var node:FlowAIPathNode = get_node_or_null(nodepath)
-			var end_pos = node.global_position
-			
-			line_mesh.surface_set_color(Color.BLUE)
-			line_mesh.surface_add_vertex(global_position)
-			
-			line_mesh.surface_set_color(Color.BLUE)
-			line_mesh.surface_add_vertex(end_pos)
+func _on_node_tree_exiting():
+	if Engine.is_editor_hint():
+		var area:FlowAIAreaNode = flowAI_controller.all_areas[areaID - 1]
+		var prev:FlowAIPathNode = flowAI_controller.all_pathnodes[prev_pathnode - 1]
 		
-		line_mesh.surface_end()
-		linked_lines_mesh.mesh = line_mesh
+		if flowAI_controller.all_pathnodes.has(self):
+			flowAI_controller.all_pathnodes.erase(self)
+			print("pathnode erased")
+		
+		if prev.links.has(ID):
+			prev.links.erase(ID)
+		
+		if area.area_pathnodes.has(ID):
+			area.area_pathnodes.erase(ID)

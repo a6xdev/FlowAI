@@ -32,12 +32,12 @@ func _ready() -> void:
 	a_astar = a_flowai_controller.create_astar()
 	
 	# Get nearest area
-	if a_flowai_controller.areas.is_empty():
+	if a_flowai_controller.all_areas.is_empty():
 		push_error("There are no areas in FlowAIController")
 	
 	var nearest_area:FlowAIAreaNode = null
 	var shortest_dist:float = INF
-	for area in a_flowai_controller.areas:
+	for area in a_flowai_controller.all_areas:
 		var dist = a_body.global_position.distance_to(area.global_position)
 		if dist < areas_radius:
 			a_areas.append(area)
@@ -47,11 +47,10 @@ func _ready() -> void:
 	
 	a_area = nearest_area
 	for area in a_areas:
-		var area_pathnodes = area.get_all_pathnodes()
-		for node in area_pathnodes:
-			a_pathnodes.append(node)
+		for pathnode_id in area.area_pathnodes:
+			var pathnode = a_flowai_controller.all_pathnodes[pathnode_id - 1]
+			a_pathnodes.append(pathnode)
 	
-	print("test: " + str(a_pathnodes))
 	#a_pathnodes = nearest_area.get_all_pathnodes()
 
 func _process(delta: float) -> void:
