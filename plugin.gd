@@ -27,7 +27,7 @@ func _process(delta: float) -> void:
 	if nodes_selected.is_empty():
 		pathnodes_selected.clear()
 	
-	# Connect Pathnodes
+	# Button to connect Pathnodes
 	if not pathnodes_selected.is_empty() and pathnodes_selected.size() == 2:
 		connect_pathnodes_btn.show()
 		var from_node = pathnodes_selected[0]
@@ -39,4 +39,3 @@ func _process(delta: float) -> void:
 			)
 	else:
 		connect_pathnodes_btn.hide()
-		#push_warning("Select only 2 FlowAIPathNodes to connect")
