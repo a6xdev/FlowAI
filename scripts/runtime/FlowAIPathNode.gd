@@ -5,10 +5,10 @@ class_name FlowAIPathNode
 
 @export var active:bool = true
 
-@export var ID:int = 0
-@export var areaID:int = 0
-@export var prev_pathnode:int = 0
-@export var links:Array[int] = []
+var ID:int = 0
+var areaID:int = 0
+var prev_pathnode:int = 0
+var links:Array[int] = []
 
 @export var flowAI_controller:FlowAIController = null
 
@@ -53,7 +53,8 @@ func _on_node_tree_exiting():
 		
 		if flowAI_controller.all_pathnodes.has(self):
 			flowAI_controller.all_pathnodes.erase(self)
-			print("FlowAIPathNode - " + str(name) + " removed")
+			if Engine.is_editor_hint():
+				print("FlowAIPathNode - " + str(name) + " removed")
 		
 		if prev.links.has(ID):
 			prev.links.erase(ID)

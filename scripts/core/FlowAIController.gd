@@ -46,7 +46,8 @@ func create_area(data:Dictionary = {}) -> FlowAIAreaNode:
 			new_area.area_pathnodes.append(int(n))
 	else:
 		new_area.ID = all_areas.size() if not all_areas.is_empty() else 1
-		print("Create FlowAIAreaNode")
+		if Engine.is_editor_hint():
+			print("Create FlowAIAreaNode")
 		
 	new_area.flowAI_controller = self
 	new_area.name = "area_" + str(new_area.ID)
@@ -78,7 +79,8 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 	else:
 		new_pathnode.ID = all_pathnodes.size() if not all_pathnodes.is_empty() else 1
 		new_pathnode.areaID = area_owner.ID
-		print("Create FlowAIPathNode")
+		if Engine.is_editor_hint():
+			print("Create FlowAIPathNode")
 	
 		if prev_node:
 			new_pathnode.prev_pathnode = prev_node.ID
@@ -116,7 +118,8 @@ func create_astar() -> AStar3D:
 			var id_b = neighbor.get_instance_id()
 			
 			if not new_astar.are_points_connected(id_a, id_b, true):
-				print("FlowAIController::astar_connect_points: id_a: " + str(point.name) + " to id_b: " + str(neighbor.name))
+				if Engine.is_editor_hint():
+					print("FlowAIController::astar_connect_points: id_a: " + str(point.name) + " to id_b: " + str(neighbor.name))
 				new_astar.connect_points(id_a, id_b, true)
 
 	return new_astar
@@ -151,7 +154,8 @@ func save_data():
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
-		print("FlowAIController: All Data has been saved")
+		if Engine.is_editor_hint():
+			print("FlowAIController: All Data has been saved")
 
 func load_data():
 	for child in get_children():

@@ -66,7 +66,7 @@ func _parse_begin(object):
 		add_next_pathnode.text = "Add Next Pathnode"
 		pathnode_id_label.text = "PathnodeID: " + str(pathnode_id)
 		pathnode_area_owner_label.text = "AreaID: " + str(object.areaID)
-		pathnode_prev_label.text = "Previous PathNode: " + str(prev.name) if prev != null else "Previous Pathnode: Nil"
+		pathnode_prev_label.text = "Previous PathNode: " + str(prev.name) if object.ID != 1 else "Previous Pathnode: Nil"
 		links_list_title.text = "Links: [Array] - " + str(pathnode_links.size())
 		
 		# Logic to show all nodes that are linked to the selected pathnode
