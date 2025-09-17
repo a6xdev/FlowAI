@@ -64,6 +64,10 @@ func _process(delta: float) -> void:
 
 #region CALLS
 func get_random_path() -> void: ## Agent choice a random path from scene.
+	if a_pathnodes.is_empty():
+		print("FlowAIAgent3D::get_random_path() - No areas were found")
+		return
+	
 	var goal_node:FlowAIPathNode = a_pathnodes[randi() % a_pathnodes.size()]
 	var start_node:FlowAIPathNode = null
 	var min_dist:float = INF
