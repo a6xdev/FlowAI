@@ -5,10 +5,12 @@ class_name FlowAIController
 
 ## A node to facilitate the creation of new areas and pathnodes.
 
+@export var is_debug_mode:bool = false
 @export_file("*json") var DataPath ## Path to the json file to save your changes and load them whenever you want.
 @export_category("Controller")
 @export var all_areas:Array[FlowAIAreaNode] = [] ## I don't recommend messing with this unless necessary. All areas are stored here for easy access using their unique IDs.
 @export var all_pathnodes:Array[FlowAIPathNode] = [] ## I don't recommend changing anything here unless absolutely necessary. All pathnodes are stored here for easy access using their unique IDs.
+
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
@@ -33,7 +35,7 @@ func create_area(data:Dictionary = {}) -> FlowAIAreaNode:
 	# This way, areas are created based on all the information the developer saved.
 	
 	var new_area := FlowAIAreaNode.new()
-	
+	new_area.flowAI_controller = self
 	add_child(new_area)
 	all_areas.append(new_area)
 	new_area.owner = get_tree().edited_scene_root
@@ -49,7 +51,6 @@ func create_area(data:Dictionary = {}) -> FlowAIAreaNode:
 		if Engine.is_editor_hint():
 			print("Create FlowAIAreaNode")
 		
-	new_area.flowAI_controller = self
 	new_area.name = "area_" + str(new_area.ID)
 	return new_area
 	
@@ -61,12 +62,10 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 		return
 	
 	var new_pathnode := FlowAIPathNode.new()
-	
+	new_pathnode.flowAI_controller = self
 	area_owner.add_child(new_pathnode)
 	all_pathnodes.append(new_pathnode)
 	new_pathnode.owner = get_tree().edited_scene_root
-	
-	new_pathnode.flowAI_controller = self
 	
 	if data:
 		var pos_data = data["position"]

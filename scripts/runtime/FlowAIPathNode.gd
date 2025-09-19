@@ -43,6 +43,9 @@ func _exit_tree() -> void:
 	pn_mesh.queue_free()
 	linked_lines_mesh.queue_free()
 	pn_material = null
+
+func _process(delta: float) -> void:
+	pn_mesh.visible = true if flowAI_controller.is_debug_mode else false
 #endregion
 
 #region SIGNALS
