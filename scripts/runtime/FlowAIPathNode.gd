@@ -22,6 +22,8 @@ var pn_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
+	pn_mesh.visible = true if flowAI_controller.is_debug_mode else false
+	
 	tree_exiting.connect(_on_node_tree_exiting)
 
 func _enter_tree() -> void:
@@ -43,9 +45,6 @@ func _exit_tree() -> void:
 	pn_mesh.queue_free()
 	linked_lines_mesh.queue_free()
 	pn_material = null
-
-func _process(delta: float) -> void:
-	pn_mesh.visible = true if flowAI_controller.is_debug_mode else false
 #endregion
 
 #region SIGNALS
