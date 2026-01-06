@@ -19,6 +19,4 @@ func _ready() -> void:
 func _on_node_tree_exiting():
 	if flowAI_controller.all_areas.has(self):
 		flowAI_controller.all_areas.erase(self)
-		if Engine.is_editor_hint():
-			print("FlowAIAreaNode - " + str(name) + " removed")
 #endregion

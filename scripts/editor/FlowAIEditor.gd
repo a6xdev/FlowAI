@@ -9,7 +9,6 @@ func _parse_begin(object):
 		var load_resource_btn := Button.new()
 		var add_area_btn := Button.new()
 		
-		save_resource_btn.text = "Save Data"
 		load_resource_btn.text = "Load Data"
 		add_area_btn.text = "Add Area"
 		

@@ -11,6 +11,7 @@ class_name FlowAIController
 @export var all_areas:Array[FlowAIAreaNode] = [] ## I don't recommend messing with this unless necessary. All areas are stored here for easy access using their unique IDs.
 @export var all_pathnodes:Array[FlowAIPathNode] = [] ## I don't recommend changing anything here unless absolutely necessary. All pathnodes are stored here for easy access using their unique IDs.
 
+var data_loaded:bool = false
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
@@ -18,15 +19,26 @@ func _ready() -> void:
 	
 	# Loads all data from the DataPath when the game runs.
 	if not Engine.is_editor_hint():
+		await load_data()
+		print("FlowAIController: All Data has been loaded")
+
+func _enter_tree() -> void:
+	if Engine.is_editor_hint():
 		load_data()
 
 func _exit_tree() -> void:
 	# When the developer leaves the project, all nodes and their references are cleaned up
 	# so as not to interfere with DataPath runtime loading.
+	data_loaded = false
 	for child in get_children():
 		all_areas.clear()
 		all_pathnodes.clear()
 		child.queue_free()
+
+func _notification(what):
+	if Engine.is_editor_hint():
+		if what == NOTIFICATION_EDITOR_PRE_SAVE:
+			save_data()
 #endregion
 
 #region CALLS
@@ -157,31 +169,32 @@ func save_data():
 			print("FlowAIController: All Data has been saved")
 
 func load_data():
-	for child in get_children():
-		all_areas.clear()
-		all_pathnodes.clear()
-		child.queue_free()
-	
-	var data = get_data_json()
-	
-	if data:
-		# Load Areas
-		for area in data["areas"]:
-			create_area(area)
+	if not data_loaded:
+		for child in get_children():
+			all_areas.clear()
+			all_pathnodes.clear()
+			child.queue_free()
 		
-		# Load Pathnodes
-		for pathnode in data["pathnodes"]:
-			var area: FlowAIAreaNode = null
-			
-			for a in all_areas:
-				if a.ID == int(pathnode["area_id"]):
-					area = a
-					break
-			
-			if area:
-				create_pathnode(area, null, pathnode)
+		var data = get_data_json()
 		
-			print("FlowAIController: All Data has been loaded")
+		if data:
+			# Load Areas
+			for area in data["areas"]:
+				create_area(area)
+			
+			# Load Pathnodes
+			for pathnode in data["pathnodes"]:
+				var area: FlowAIAreaNode = null
+				
+				for a in all_areas:
+					if a.ID == int(pathnode["area_id"]):
+						area = a
+						break
+				
+				if area:
+					create_pathnode(area, null, pathnode)
+			
+			data_loaded = true
 
 func get_data_json() -> Dictionary:
 	if not FileAccess.file_exists(DataPath):

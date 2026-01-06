@@ -55,8 +55,6 @@ func _on_node_tree_exiting():
 		
 		if flowAI_controller.all_pathnodes.has(self):
 			flowAI_controller.all_pathnodes.erase(self)
-			if Engine.is_editor_hint():
-				print("FlowAIPathNode - " + str(name) + " removed")
 		
 		if prev.links.has(ID):
 			prev.links.erase(ID)
