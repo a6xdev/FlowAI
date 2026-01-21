@@ -5,11 +5,12 @@ class_name FlowAIController
 
 ## A node to facilitate the creation of new areas and pathnodes.
 
-@export var is_debug_mode:bool = false
 @export_file("*json") var DataPath ## Path to the json file to save your changes and load them whenever you want.
 @export_category("Controller")
 @export var all_areas:Array[FlowAIAreaNode] = [] ## I don't recommend messing with this unless necessary. All areas are stored here for easy access using their unique IDs.
 @export var all_pathnodes:Array[FlowAIPathNode] = [] ## I don't recommend changing anything here unless absolutely necessary. All pathnodes are stored here for easy access using their unique IDs.
+@export_group("Debug")
+@export var active_pathnode_shape:bool = false
 
 var data_loaded:bool = false
 
@@ -118,6 +119,7 @@ func create_astar() -> AStar3D:
 	# Add pathnodes
 	for point in all_pathnodes:
 		var id:int = point.get_instance_id()
+		point.astar_id = id
 		new_astar.add_point(id, point.global_position)
 
 	# Connect the pathnodes
@@ -158,7 +160,7 @@ func save_data():
 			"area_id": pathnode.areaID,
 			"prev_pathnode": pathnode.prev_pathnode,
 			"links": pathnode.links,
-			"position": [pathnode.global_position.x, pathnode.global_position.y, pathnode.global_position.z]
+			"position": [pathnode.global_position.x, pathnode.global_position.y, pathnode.global_position.z],
 		})
 		
 	var file = FileAccess.open(DataPath, FileAccess.WRITE)

@@ -6,6 +6,7 @@ var a_pathnodes:Array[FlowAIPathNode] = []
 
 var a_is_path_complete:bool = false
 var a_current_pathnode:FlowAIPathNode = null
+var a_current_pathnode_astar_id = null
 var a_current_path:Array = []
 var a_path_index:int = 0
 
@@ -14,7 +15,10 @@ var a_body:CharacterBody3D = null
 var a_flowai_controller:FlowAIController = null
 var a_area:FlowAIAreaNode = null
 
+var previous_target:FlowAIPathNode = null
+
 @export var areas_radius:float = 10.0 ## NPCs will not have access to all areas of the map, only those within this radius.
+@export var max_claimed_targets:int = 3
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
@@ -61,6 +65,7 @@ func _process(delta: float) -> void:
 	if not a_current_path.is_empty():
 		var dist = a_body.global_position.distance_to(a_current_path[a_path_index])
 		if dist < path_desired_distance + 0.2:
+			a_astar.set_point_weight_scale(a_current_pathnode_astar_id, 1.0)
 			set_next_path_index()
 #endregion
 
@@ -77,6 +82,9 @@ func get_random_path() -> void: ## Agent choice a random path from scene.
 	a_is_path_complete = false
 	
 	for node in a_pathnodes:
+		if node == previous_target: # Check if the node is in old_targets
+			continue
+			
 		var dist = a_body.global_position.distance_to(node.global_position)
 		if dist < min_dist:
 			min_dist = dist
@@ -101,8 +109,21 @@ func set_goal_pathnode(goal:FlowAIPathNode) -> void: ## Define a FlowAIPathNode 
 func astar_find_path(start:FlowAIPathNode, goal:FlowAIPathNode) -> PackedVector3Array: ## Private Funtion
 	var start_id = start.get_instance_id()
 	var goal_id = goal.get_instance_id()
+	
+	# DEBUG:
+	if a_current_pathnode: a_current_pathnode.pn_material.albedo_color = Color(1, 1, 1)
+	
 	if a_astar.has_point(start_id) and a_astar.has_point(goal_id):
 		var path = a_astar.get_point_path(start_id, goal_id)
+		
+		# DEBUG:
+		goal.pn_material.albedo_color = Color(1, 0, 0)
+		# END DEBUG
+		
+		previous_target = goal
+		a_current_pathnode = goal
+		a_current_pathnode_astar_id = goal_id
+		a_astar.set_point_weight_scale(goal_id, 5.0)
 		return path
 	else:
 		push_error("One of the points does not exist graph")

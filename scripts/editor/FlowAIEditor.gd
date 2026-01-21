@@ -35,16 +35,26 @@ func _parse_begin(object):
 	
 	elif object is FlowAIAreaNode:
 		var add_pathnode_btn := Button.new()
+		var snap_all_pahtnodes_to_ground := Button.new()
 		
 		# Create Pathnode
 		add_pathnode_btn.text = "Add PathNode"
+		snap_all_pahtnodes_to_ground.text = "Snap All Pathnodes to Ground"
+		
 		add_pathnode_btn.pressed.connect(func():
 			var new_pathnode = object.flowAI_controller.create_pathnode(object)
 			if Engine.is_editor_hint():
 				EditorInterface.edit_node(new_pathnode)
 			)
 		
+		snap_all_pahtnodes_to_ground.pressed.connect(func():
+			for node in object.get_children():
+				if node is FlowAIPathNode:
+					node.snap_to_ground()
+			)
+		
 		add_custom_control(add_pathnode_btn)
+		add_custom_control(snap_all_pahtnodes_to_ground)
 	
 	elif object is FlowAIPathNode:
 		var pathnode_id = object.ID
@@ -55,6 +65,7 @@ func _parse_begin(object):
 		
 		# Inspector UI
 		var add_next_pathnode := Button.new()
+		var snap_to_ground := Button.new()
 		var pathnode_id_label := Label.new()
 		var pathnode_area_owner_label := Label.new()
 		var pathnode_prev_label := Label.new()
@@ -63,6 +74,7 @@ func _parse_begin(object):
 		var links_list_vertical := VBoxContainer.new()
 		
 		add_next_pathnode.text = "Add Next Pathnode"
+		snap_to_ground.text = "Snap to Ground"
 		pathnode_id_label.text = "PathnodeID: " + str(pathnode_id)
 		pathnode_area_owner_label.text = "AreaID: " + str(object.areaID)
 		pathnode_prev_label.text = "Previous PathNode: " + str(prev.name) if object.ID != 1 else "Previous Pathnode: Nil"
@@ -83,9 +95,14 @@ func _parse_begin(object):
 				EditorInterface.edit_node(new_pathnode)
 			)
 		
+		snap_to_ground.pressed.connect(func():
+			object.snap_to_ground()
+			)
+		
 		add_custom_control(pathnode_id_label)
 		add_custom_control(pathnode_area_owner_label)
 		add_custom_control(pathnode_prev_label)
 		add_custom_control(links_list_title)
 		add_custom_control(links_list_vertical)
 		add_custom_control(add_next_pathnode)
+		add_custom_control(snap_to_ground)

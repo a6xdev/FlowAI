@@ -10,6 +10,10 @@ var areaID:int = 0
 var prev_pathnode:int = 0
 var links:Array[int] = []
 
+# Astar
+var astar_id:int = 0
+var astar_weight_scale:float = 1.0
+
 @export var flowAI_controller:FlowAIController = null
 
 # Just a mesh to better observe the nodes in the scene
@@ -22,7 +26,8 @@ var pn_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
-	pn_mesh.visible = true if flowAI_controller.is_debug_mode else false
+	if not Engine.is_editor_hint():
+		pn_mesh.visible = true if flowAI_controller.active_pathnode_shape else false
 	
 	tree_exiting.connect(_on_node_tree_exiting)
 
@@ -45,6 +50,18 @@ func _exit_tree() -> void:
 	pn_mesh.queue_free()
 	linked_lines_mesh.queue_free()
 	pn_material = null
+#endregion
+
+#region EDITOR CALLS
+## Plugin private function. Dont have any reason for you to use that.
+func snap_to_ground() -> void:
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 2, global_position + Vector3.DOWN * 10)
+	var result = space_state.intersect_ray(query)
+	if result:
+		var collider = result.get("collider")
+		if collider is StaticBody3D: # I dont wanna the snap using characters as ground.
+			global_position = result.position
 #endregion
 
 #region SIGNALS
