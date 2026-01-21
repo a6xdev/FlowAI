@@ -23,6 +23,8 @@ func _ready() -> void:
 		printerr("FlowAIAgent3D - Parent is not a CharacterBody3D.")
 		get_tree().quit()
 	
+	a_body.visibility_changed.connect(_on_body_visibility_changed)
+	
 	# Get FlowAIController in get_root()
 	# --- Scene
 	# -- FlowAIController
@@ -138,4 +140,11 @@ func get_current_controller() -> FlowAIController:
 #endregion
 
 #region SIGNALS
+func _on_body_visibility_changed() -> void:
+	# Reset Agent when body is disabled
+	if not a_body.visible:
+		a_current_path.clear()
+		a_current_pathnode = null
+		a_path_index = 0
+		a_is_path_complete = false
 #endregion
