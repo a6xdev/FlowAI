@@ -11,6 +11,8 @@ class_name FlowAIController
 @export var all_pathnodes:Array[FlowAIPathNode] = [] ## I don't recommend changing anything here unless absolutely necessary. All pathnodes are stored here for easy access using their unique IDs.
 @export_group("Debug")
 @export var active_pathnode_shape:bool = false
+@export var active_pathnode_lines:bool = true
+@export var show_pathnode_lines_in_game:bool = false
 
 var current_astar:AStar3D = null
 
@@ -33,9 +35,9 @@ func _exit_tree() -> void:
 	# When the developer leaves the project, all nodes and their references are cleaned up
 	# so as not to interfere with DataPath runtime loading.
 	data_loaded = false
+	all_areas.clear()
+	all_pathnodes.clear()
 	for child in get_children():
-		all_areas.clear()
-		all_pathnodes.clear()
 		child.queue_free()
 
 func _notification(what):

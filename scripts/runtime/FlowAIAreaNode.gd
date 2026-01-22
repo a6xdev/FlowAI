@@ -6,7 +6,7 @@ class_name FlowAIAreaNode
 @export var flow_controller:FlowAIController = null
 
 @export_group("Debug")
-# TODO: Set Color of lines vertex
+@export var line_color:Color = Color(0, 1, 0)
 
 var ID:int = 0 ## Unique ID
 var area_pathnodes:Array[int] = [] ## All pathnodes in this area
@@ -17,7 +17,7 @@ var m_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
-	if Engine.is_editor_hint(): 
+	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines_in_game: 
 		m_line_mesh = MeshInstance3D.new()
 		m_line_immediate = ImmediateMesh.new()
 		m_material = StandardMaterial3D.new()
@@ -38,7 +38,7 @@ func _exit_tree() -> void:
 	m_material = null
 
 func _process(delta: float) -> void:
-	if not Engine.is_editor_hint() or not m_line_immediate:
+	if not Engine.is_editor_hint() and not flow_controller.show_pathnode_lines_in_game and not m_line_immediate:
 		return
 
 	m_line_immediate.clear_surfaces()
@@ -59,10 +59,10 @@ func _process(delta: float) -> void:
 					
 					if next_pathnode:
 						# Desenha o segmento de linha
-						m_line_immediate.surface_set_color(Color(0, 1, 0))
+						m_line_immediate.surface_set_color(line_color)
 						m_line_immediate.surface_add_vertex(pathnode.global_position)
 						
-						m_line_immediate.surface_set_color(Color(0, 1, 0))
+						m_line_immediate.surface_set_color(line_color)
 						m_line_immediate.surface_add_vertex(next_pathnode.global_position)
 						
 						vertex_count += 2
