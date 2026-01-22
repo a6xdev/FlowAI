@@ -41,16 +41,14 @@ func _process(delta: float) -> void:
 	if not Engine.is_editor_hint() and not flow_controller.show_pathnode_lines_in_game and not m_line_immediate:
 		return
 
-	m_line_immediate.clear_surfaces()
-	
 	var vertex_count = 0
-	
+	m_line_immediate.clear_surfaces()
+	m_line_mesh.global_transform = Transform3D.IDENTITY
 	m_line_immediate.surface_begin(Mesh.PRIMITIVE_LINES)
 
 	for pathnode_id in area_pathnodes:
 		var pathnode: FlowAIPathNode = flow_controller.all_pathnodes.get(pathnode_id - 1)
 		
-		# Verificação de segurança
 		if pathnode and not pathnode.links.is_empty():
 			for link_id in pathnode.links:
 				var index = link_id - 1
@@ -58,7 +56,6 @@ func _process(delta: float) -> void:
 					var next_pathnode = flow_controller.all_pathnodes[index]
 					
 					if next_pathnode:
-						# Desenha o segmento de linha
 						m_line_immediate.surface_set_color(line_color)
 						m_line_immediate.surface_add_vertex(pathnode.global_position)
 						

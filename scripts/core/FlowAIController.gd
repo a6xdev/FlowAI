@@ -44,6 +44,8 @@ func _notification(what):
 	if Engine.is_editor_hint():
 		if what == NOTIFICATION_EDITOR_PRE_SAVE:
 			save_data()
+		elif what == NOTIFICATION_EXIT_TREE:
+			_exit_tree()
 #endregion
 
 #region CALLS
