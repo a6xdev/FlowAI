@@ -42,7 +42,7 @@ func _parse_begin(object):
 		snap_all_pahtnodes_to_ground.text = "Snap All Pathnodes to Ground"
 		
 		add_pathnode_btn.pressed.connect(func():
-			var new_pathnode = object.flowAI_controller.create_pathnode(object)
+			var new_pathnode = object.flow_controller.create_pathnode(object)
 			if Engine.is_editor_hint():
 				EditorInterface.edit_node(new_pathnode)
 			)
@@ -59,7 +59,7 @@ func _parse_begin(object):
 	elif object is FlowAIPathNode:
 		var pathnode_id = object.ID
 		var pathnode_links = object.links
-		var controller:FlowAIController = object.flowAI_controller
+		var controller:FlowAIController = object.flow_controller
 		var area:FlowAIAreaNode = controller.all_areas[object.areaID - 1]
 		var prev:FlowAIPathNode = controller.all_pathnodes[object.prev_pathnode - 1] if area.area_pathnodes.size() != 1 else null
 		

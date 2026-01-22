@@ -12,6 +12,8 @@ class_name FlowAIController
 @export_group("Debug")
 @export var active_pathnode_shape:bool = false
 
+var current_astar:AStar3D = null
+
 var data_loaded:bool = false
 
 #region GODOT FUNCTIONS
@@ -48,7 +50,7 @@ func create_area(data:Dictionary = {}) -> FlowAIAreaNode:
 	# This way, areas are created based on all the information the developer saved.
 	
 	var new_area := FlowAIAreaNode.new()
-	new_area.flowAI_controller = self
+	new_area.flow_controller = self
 	add_child(new_area)
 	all_areas.append(new_area)
 	new_area.owner = get_tree().edited_scene_root
@@ -75,7 +77,7 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 		return
 	
 	var new_pathnode := FlowAIPathNode.new()
-	new_pathnode.flowAI_controller = self
+	new_pathnode.flow_controller = self
 	area_owner.add_child(new_pathnode)
 	all_pathnodes.append(new_pathnode)
 	new_pathnode.owner = get_tree().edited_scene_root
@@ -119,8 +121,8 @@ func create_astar() -> AStar3D:
 	# Add pathnodes
 	for point in all_pathnodes:
 		var id:int = point.get_instance_id()
-		point.astar_id = id
 		new_astar.add_point(id, point.global_position)
+		point.astar_id = id
 
 	# Connect the pathnodes
 	for point in all_pathnodes:
@@ -134,7 +136,8 @@ func create_astar() -> AStar3D:
 				if Engine.is_editor_hint():
 					print("FlowAIController::astar_connect_points: id_a: " + str(point.name) + " to id_b: " + str(neighbor.name))
 				new_astar.connect_points(id_a, id_b, true)
-
+	
+	current_astar = new_astar
 	return new_astar
 
 func save_data():
@@ -146,6 +149,21 @@ func save_data():
 		"areas": [],
 		"pathnodes": []
 	}
+	
+	# Reload all content again
+	all_areas.clear()
+	all_pathnodes.clear()
+	
+	for area in get_children():
+		if area is FlowAIAreaNode:
+			all_areas.append(area)
+			for pathnode in area.get_children():
+				if pathnode is FlowAIPathNode:
+					all_pathnodes.append(pathnode)
+	
+	print("\nFLOW_AI:SAVING_DATA")
+	print("FLOW_AI:TOTAL_AREAS: ", all_areas.size())
+	print("FLOW_AI:TOTAL_PATHNODES: ", all_pathnodes.size())
 	
 	for area in all_areas:
 		data["areas"].append({
@@ -168,7 +186,7 @@ func save_data():
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
 		if Engine.is_editor_hint():
-			print("FlowAIController: All Data has been saved")
+			print("FLOW_AI:DATA_SAVED\n")
 
 func load_data():
 	if not data_loaded:
