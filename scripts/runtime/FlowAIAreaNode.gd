@@ -9,7 +9,7 @@ class_name FlowAIAreaNode
 @export var line_color:Color = Color(0, 1, 0)
 
 var ID:int = 0 ## Unique ID
-var area_pathnodes:Array[int] = [] ## All pathnodes in this area
+@export var area_pathnodes:Array[int] = [] ## All pathnodes in this area
 
 var m_line_mesh:MeshInstance3D = null
 var m_line_immediate:ImmediateMesh = null
@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 	if not Engine.is_editor_hint() and not flow_controller.show_pathnode_lines_in_game and not m_line_immediate:
 		return
 	
-	m_line_immediate.clear_surfaces()
+	if m_line_immediate: m_line_immediate.clear_surfaces()
 	
 	if flow_controller.active_pathnode_lines:
 		var vertex_count = 0

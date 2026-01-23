@@ -22,28 +22,28 @@ var data_loaded:bool = false
 func _ready() -> void:
 	add_to_group("FlowAIController")
 	
-	# Loads all data from the DataPath when the game runs.
 	if not Engine.is_editor_hint():
+		# Runtime
 		await load_data()
 		print("FlowAIController: All Data has been loaded")
+	else:
+		refresh_internal_references()
 
 func _enter_tree() -> void:
 	if Engine.is_editor_hint():
-		reset_system()
-		load_data()
+		refresh_internal_references()
 
 func _exit_tree() -> void:
 	# When the developer leaves the project, all nodes and their references are cleaned up
 	# so as not to interfere with DataPath runtime loading.
 	data_loaded = false
-	reset_system()
+	all_areas.clear()
+	all_pathnodes.clear()
 
 func _notification(what):
 	if Engine.is_editor_hint():
 		if what == NOTIFICATION_EDITOR_PRE_SAVE:
 			save_data()
-		elif what == NOTIFICATION_EXIT_TREE:
-			_exit_tree()
 #endregion
 
 #region CALLS
@@ -92,6 +92,7 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 		new_pathnode.global_position = Vector3(float(pos_data[0]), float(pos_data[1]), float(pos_data[2]))
 		for n in data["links"]:
 			new_pathnode.links.append(int(n))
+		area_owner.area_pathnodes.append(new_pathnode.ID)
 	else:
 		new_pathnode.ID = all_pathnodes.size() if not all_pathnodes.is_empty() else 1
 		new_pathnode.areaID = area_owner.ID
@@ -142,13 +143,18 @@ func create_astar() -> AStar3D:
 	current_astar = new_astar
 	return new_astar
 
-func reset_system() -> void:
+func refresh_internal_references() -> void:
 	all_areas.clear()
 	all_pathnodes.clear()
-	for child in get_children():
-		child.queue_free()
+	data_loaded = false
+	load_data()
 
 func save_data():
+	if all_pathnodes.is_empty() and all_areas.is_empty():
+		# A safety lock to prevent saving a file while switching scenes or something similar, 
+		# so as not to lose all the data.
+		return
+	
 	if not DataPath:
 		printerr("FlowAIController: Data Path is Empty, put a path of a json file")
 		return
@@ -197,32 +203,40 @@ func save_data():
 			print("FLOW_AI:DATA_SAVED\n")
 
 func load_data():
-	if not data_loaded:
-		for child in get_children():
-			all_areas.clear()
-			all_pathnodes.clear()
-			child.queue_free()
-		
-		var data = get_data_json()
-		
-		if data:
-			# Load Areas
-			for area in data["areas"]:
-				create_area(area)
-			
-			# Load Pathnodes
-			for pathnode in data["pathnodes"]:
-				var area: FlowAIAreaNode = null
-				
-				for a in all_areas:
-					if a.ID == int(pathnode["area_id"]):
-						area = a
-						break
-				
-				if area:
-					create_pathnode(area, null, pathnode)
-			
-			data_loaded = true
+	var data = get_data_json()
+	if not data: return
+	
+	all_areas.clear()
+	all_pathnodes.clear()
+	for child in get_children():
+		child.queue_free()
+	if Engine.is_editor_hint(): await get_tree().create_timer(0.2).timeout
+	
+	# Map what already exists to avoid duplication.
+	var physical_areas = {}
+	var physical_pathnodes = {}
+	for child in get_children():
+		if child is FlowAIAreaNode:
+			physical_areas[child.ID] = child
+			for p in child.get_children():
+				if p is FlowAIPathNode:
+					physical_pathnodes[p.ID] = p
+	
+	# Load Areas
+	for area_data in data["areas"]:
+		create_area(area_data)
+	
+	# Load Pathnodes
+	for pathnode_data in data["pathnodes"]:
+			var parent_area = null
+			for a in all_areas:
+				if a.ID == int(pathnode_data["area_id"]):
+					parent_area = a
+					break
+			if parent_area:
+				create_pathnode(parent_area, null, pathnode_data)
+	
+	data_loaded = true
 
 func get_data_json() -> Dictionary:
 	if not FileAccess.file_exists(DataPath):

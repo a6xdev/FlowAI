@@ -19,6 +19,7 @@ func _parse_begin(object):
 			
 		# Load current data
 		load_resource_btn.pressed.connect(func():
+			object.data_loaded = false
 			object.load_data()
 			)
 		
@@ -85,7 +86,7 @@ func _parse_begin(object):
 			var pathnode = controller.all_pathnodes[id - 1]
 			if pathnode != null:
 				var pathnode_label := Label.new()
-				pathnode_label.text = "  >  " + "[" + str(id - 1) + "]:  " + str(pathnode.name)
+				pathnode_label.text = "  >  " + "[" + str(id) + "]:  " + str(pathnode.name)
 				links_list_vertical.add_child(pathnode_label)
 		
 		# To create a new pathnode that will be automatically connected to the selected pathnode.

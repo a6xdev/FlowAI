@@ -7,6 +7,7 @@ class_name FlowAIPathNode
 @export var weight_scale_base:float = 1.0
 @export var flow_controller:FlowAIController = null # Dont care if it.
 
+@export_category("Dont Touch")
 var ID:int = 0
 var areaID:int = 0
 var prev_pathnode:int = 0
@@ -84,15 +85,16 @@ func snap_to_ground() -> void:
 #region SIGNALS
 func _on_node_tree_exiting():
 	if Engine.is_editor_hint():
-		var area:FlowAIAreaNode = flow_controller.all_areas[areaID - 1]
-		var prev:FlowAIPathNode = flow_controller.all_pathnodes[prev_pathnode - 1]
-		
-		if flow_controller.all_pathnodes.has(self):
-			flow_controller.all_pathnodes.erase(self)
-		
-		if prev.links.has(ID):
-			prev.links.erase(ID)
-		
-		if area.area_pathnodes.has(ID):
-			area.area_pathnodes.erase(ID)
+		if flow_controller.all_areas.size() > 0:
+			var area:FlowAIAreaNode = flow_controller.all_areas[areaID - 1]
+			var prev:FlowAIPathNode = flow_controller.all_pathnodes[prev_pathnode - 1]
+			
+			if flow_controller.all_pathnodes.has(self):
+				flow_controller.all_pathnodes.erase(self)
+			
+			if prev.links.has(ID):
+				prev.links.erase(ID)
+			
+			if area.area_pathnodes.has(ID):
+				area.area_pathnodes.erase(ID)
 #endregion
