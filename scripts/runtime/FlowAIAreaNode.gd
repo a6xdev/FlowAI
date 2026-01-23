@@ -65,7 +65,7 @@ func _process(delta: float) -> void:
 						vertex_count += 2
 	
 	if vertex_count > 0:
-		if m_line_mesh.get_surface_override_material(0) == null:
+		if m_line_mesh.get_surface_override_material_count() > 0:
 			m_line_mesh.set_surface_override_material(0, m_material)
 		m_line_immediate.surface_end()
 	else:
