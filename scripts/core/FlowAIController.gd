@@ -29,16 +29,14 @@ func _ready() -> void:
 
 func _enter_tree() -> void:
 	if Engine.is_editor_hint():
+		reset_system()
 		load_data()
 
 func _exit_tree() -> void:
 	# When the developer leaves the project, all nodes and their references are cleaned up
 	# so as not to interfere with DataPath runtime loading.
 	data_loaded = false
-	all_areas.clear()
-	all_pathnodes.clear()
-	for child in get_children():
-		child.queue_free()
+	reset_system()
 
 func _notification(what):
 	if Engine.is_editor_hint():
@@ -144,6 +142,12 @@ func create_astar() -> AStar3D:
 	current_astar = new_astar
 	return new_astar
 
+func reset_system() -> void:
+	all_areas.clear()
+	all_pathnodes.clear()
+	for child in get_children():
+		child.queue_free()
+
 func save_data():
 	if not DataPath:
 		printerr("FlowAIController: Data Path is Empty, put a path of a json file")
@@ -238,6 +242,18 @@ func get_data_json() -> Dictionary:
 		return {}
 	
 	return json
+
+func get_nearest_pathnode(pos:Vector3) -> FlowAIPathNode:
+	var nearest_pathnode:FlowAIPathNode = null
+	var shortest_dist:float = INF
+	
+	for node in all_pathnodes:
+		var dist = pos.distance_to(node.global_position)
+		if dist < shortest_dist:
+			shortest_dist = dist
+			nearest_pathnode = node
+	
+	return nearest_pathnode
 #endregion
 
 #region SIGNALS
