@@ -10,9 +10,9 @@ class_name FlowAIController
 @export var all_areas:Array[FlowAIAreaNode] = [] ## I don't recommend messing with this unless necessary. All areas are stored here for easy access using their unique IDs.
 @export var all_pathnodes:Array[FlowAIPathNode] = [] ## I don't recommend changing anything here unless absolutely necessary. All pathnodes are stored here for easy access using their unique IDs.
 @export_group("Debug")
-@export var active_pathnode_shape:bool = false
-@export var active_pathnode_lines:bool = true
-@export var show_pathnode_lines_in_game:bool = false
+@export var show_pathnode_shape:bool = false
+@export var show_pathnode_lines:bool = true
+@export var show_pathnode_label:bool = false
 
 var current_astar:AStar3D = null
 
@@ -104,8 +104,9 @@ func create_pathnode(area_owner:FlowAIAreaNode, prev_node:FlowAIPathNode = null,
 			prev_node.links.append(new_pathnode.ID)
 			new_pathnode.global_position = prev_node.global_position
 		area_owner.area_pathnodes.append(new_pathnode.ID)
-		
+	
 	new_pathnode.name = "pathnode_" + str(new_pathnode.ID)
+	new_pathnode.pn_label.text = new_pathnode.name
 	return new_pathnode
 
 func connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
@@ -257,15 +258,18 @@ func get_data_json() -> Dictionary:
 	
 	return json
 
-func get_nearest_pathnode(pos:Vector3) -> FlowAIPathNode:
+func get_nearest_pathnode_from_pos(pos:Vector3, area_id:int) -> FlowAIPathNode:
+	var area:FlowAIAreaNode = all_areas.get(area_id - 1)
 	var nearest_pathnode:FlowAIPathNode = null
 	var shortest_dist:float = INF
 	
-	for node in all_pathnodes:
-		var dist = pos.distance_to(node.global_position)
-		if dist < shortest_dist:
-			shortest_dist = dist
-			nearest_pathnode = node
+	if area:
+		for node_id in area.area_pathnodes:
+			var pathnode = all_pathnodes.get(node_id - 1)
+			var dist = pos.distance_to(pathnode.global_position)
+			if dist < shortest_dist:
+				shortest_dist = dist
+				nearest_pathnode = pathnode
 	
 	return nearest_pathnode
 #endregion

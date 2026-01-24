@@ -7,7 +7,6 @@ class_name FlowAIPathNode
 @export var weight_scale_base:float = 1.0
 @export var flow_controller:FlowAIController = null # Dont care if it.
 
-@export_category("Dont Touch")
 var ID:int = 0
 var areaID:int = 0
 var prev_pathnode:int = 0
@@ -18,14 +17,16 @@ var m_agents:Array[FlowAIAgent3D] = []
 var weight_multiplier = 1.5
 var current_weight_scale:float = 0.0
 
+# DEBUG - some nodes to a better observe in the scene
 # Just a mesh to better observe the nodes in the scene
 var pn_mesh:MeshInstance3D = null
 var pn_material:StandardMaterial3D = null
+var pn_label:Label3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
-	if not Engine.is_editor_hint():
-		pn_mesh.visible = true if flow_controller.active_pathnode_shape else false
+	pn_mesh.visible = true if flow_controller.show_pathnode_shape else false
+	pn_label.visible = true if flow_controller.show_pathnode_label else false
 	
 	tree_exiting.connect(_on_node_tree_exiting)
 
@@ -33,14 +34,21 @@ func _enter_tree() -> void:
 	var mesh := BoxMesh.new()
 	pn_mesh = MeshInstance3D.new()
 	pn_material = StandardMaterial3D.new()
-	
-	mesh.size = Vector3(0.2, 0.2, 0.2)
-	pn_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	pn_label = Label3D.new()
 	
 	pn_mesh.mesh = mesh
+	mesh.size = Vector3(0.2, 0.2, 0.2)
+	pn_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	pn_mesh.set_surface_override_material(0, pn_material)
 	
+	# The text of the label I set on create_pathnode in FlowAIController.
+	pn_label.position = Vector3(0, 0.5, 0)
+	pn_label.font_size = 16
+	pn_label.outline_size = 6
+	pn_label.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	
 	add_child(pn_mesh)
+	add_child(pn_label)
 	
 func _exit_tree() -> void:
 	pn_mesh.queue_free()
@@ -64,7 +72,7 @@ func reload_weight_scale() -> void:
 	flow_controller.current_astar.set_point_weight_scale(astar_id, current_weight_scale)
 	
 	if current_weight_scale == weight_scale_base:
-		pn_material.albedo_color = Color(0, 1, 1)
+		pn_material.albedo_color = Color(1, 1, 1)
 	elif current_weight_scale < 5.0:
 		pn_material.albedo_color = Color(0, 1, 0)
 	else:

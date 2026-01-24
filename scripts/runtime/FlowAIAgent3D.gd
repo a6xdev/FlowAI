@@ -26,6 +26,7 @@ func _ready() -> void:
 	if not parent_character_body:
 		printerr("FlowAIAgent3D - Parent is not a CharacterBody3D.")
 		get_tree().quit()
+		return
 	
 	parent_character_body.visibility_changed.connect(_on_body_visibility_changed)
 	

@@ -17,7 +17,7 @@ var m_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
-	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines_in_game: 
+	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines: 
 		m_line_mesh = MeshInstance3D.new()
 		m_line_immediate = ImmediateMesh.new()
 		m_material = StandardMaterial3D.new()
@@ -38,12 +38,12 @@ func _exit_tree() -> void:
 	m_material = null
 
 func _process(delta: float) -> void:
-	if not Engine.is_editor_hint() and not flow_controller.show_pathnode_lines_in_game and not m_line_immediate:
+	if (not Engine.is_editor_hint() or not flow_controller.show_pathnode_lines) and not m_line_immediate:
 		return
 	
 	if m_line_immediate: m_line_immediate.clear_surfaces()
 	
-	if flow_controller.active_pathnode_lines:
+	if flow_controller.show_pathnode_lines:
 		var vertex_count = 0
 		m_line_mesh.global_transform = Transform3D.IDENTITY
 		m_line_immediate.surface_begin(Mesh.PRIMITIVE_LINES)
