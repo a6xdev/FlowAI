@@ -26,8 +26,6 @@ func _ready() -> void:
 		# Runtime
 		await load_data()
 		print("FlowAIController: All Data has been loaded")
-	else:
-		refresh_internal_references()
 
 func _enter_tree() -> void:
 	if Engine.is_editor_hint():
@@ -39,6 +37,8 @@ func _exit_tree() -> void:
 	data_loaded = false
 	all_areas.clear()
 	all_pathnodes.clear()
+	for child in get_children():
+		child.queue_free()
 
 func _notification(what):
 	if Engine.is_editor_hint():
