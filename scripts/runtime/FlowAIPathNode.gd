@@ -92,6 +92,9 @@ func _snap_to_ground() -> void:
 #region CALLS
 func get_pathnode_id() -> int:
 	return ID
+
+func get_pathnode_area_id() -> int:
+	return areaID
 #endregion
 
 #region SIGNALS
