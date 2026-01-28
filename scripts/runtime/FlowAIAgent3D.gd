@@ -103,13 +103,13 @@ func astar_find_path(start:FlowAIPathNode, goal:FlowAIPathNode) -> PackedVector3
 	
 	# If exist a current pathnode, reset.
 	if a_current_pathnode:
-		a_current_pathnode.unregister_agent(self)
+		a_current_pathnode._unregister_agent(self)
 		a_current_pathnode = null
 	
 	if current_astar.has_point(start_id) and current_astar.has_point(goal_id):
 		var path = current_astar.get_point_path(start_id, goal_id)
 		
-		goal.register_agent(self)
+		goal._register_agent(self)
 		previous_target = goal
 		a_current_pathnode = goal
 		a_current_pathnode_astar_id = goal_id

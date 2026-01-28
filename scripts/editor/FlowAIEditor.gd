@@ -51,7 +51,7 @@ func _parse_begin(object):
 		snap_all_pahtnodes_to_ground.pressed.connect(func():
 			for node in object.get_children():
 				if node is FlowAIPathNode:
-					node.snap_to_ground()
+					node._snap_to_ground()
 			)
 		
 		add_custom_control(add_pathnode_btn)
@@ -97,7 +97,7 @@ func _parse_begin(object):
 			)
 		
 		snap_to_ground.pressed.connect(func():
-			object.snap_to_ground()
+			object._snap_to_ground()
 			)
 		
 		add_custom_control(pathnode_id_label)

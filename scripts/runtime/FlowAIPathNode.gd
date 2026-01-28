@@ -57,17 +57,17 @@ func _exit_tree() -> void:
 
 #region PLUGIN CALLS
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
-func register_agent(agent:FlowAIAgent3D) -> void:
+func _register_agent(agent:FlowAIAgent3D) -> void:
 	m_agents.append(agent)
-	reload_weight_scale()
+	_reload_weight_scale()
 
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
-func unregister_agent(agent:FlowAIAgent3D) -> void:
+func _unregister_agent(agent:FlowAIAgent3D) -> void:
 	m_agents.erase(agent)
-	reload_weight_scale()
+	_reload_weight_scale()
 
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
-func reload_weight_scale() -> void:
+func _reload_weight_scale() -> void:
 	current_weight_scale = weight_scale_base + (m_agents.size() * weight_multiplier)
 	flow_controller.current_astar.set_point_weight_scale(astar_id, current_weight_scale)
 	
@@ -79,7 +79,7 @@ func reload_weight_scale() -> void:
 		pn_material.albedo_color = Color(1, 0, 0)
 
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
-func snap_to_ground() -> void:
+func _snap_to_ground() -> void:
 	var space_state = get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 2, global_position + Vector3.DOWN * 10)
 	var result = space_state.intersect_ray(query)
@@ -87,7 +87,11 @@ func snap_to_ground() -> void:
 		var collider = result.get("collider")
 		if collider is StaticBody3D: # I dont wanna the snap using characters as ground.
 			global_position = result.position
-		
+#endregion
+
+#region CALLS
+func get_pathnode_id() -> int:
+	return ID
 #endregion
 
 #region SIGNALS
