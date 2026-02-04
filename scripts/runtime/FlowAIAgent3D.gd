@@ -38,7 +38,11 @@ func _ready() -> void:
 	var controllers_in_scene = get_tree().get_nodes_in_group("FlowAIController")
 	if controllers_in_scene.size() >= 1:
 		flowai_controller = controllers_in_scene[0] as FlowAIController
-		
+	
+	# Check if exists FlowAIController in the current scene and create the Astar.
+	if not flowai_controller:
+		printerr("FlowAIAgent3D - There are no FLowAIController in the current scene")
+	
 	current_astar = flowai_controller.create_astar()
 	
 	# Get nearby areas
