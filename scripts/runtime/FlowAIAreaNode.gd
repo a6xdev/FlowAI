@@ -4,12 +4,12 @@ extends Node3D
 class_name FlowAIAreaNode
 
 @export var flow_controller:FlowAIController = null
+@export var a_pathnodes_list:Array[String] = []
 
 @export_group("Debug")
 @export var line_color:Color = Color(0, 1, 0)
 
-var ID:int = 0 ## Unique ID
-@export var area_pathnodes:Array[int] = [] ## All pathnodes in this area
+var a_id:int = 0 ## My Unique ID :0
 
 var m_line_mesh:MeshInstance3D = null
 var m_line_immediate:ImmediateMesh = null
@@ -48,23 +48,20 @@ func _process(delta: float) -> void:
 		m_line_mesh.global_transform = Transform3D.IDENTITY
 		m_line_immediate.surface_begin(Mesh.PRIMITIVE_LINES)
 
-		for pathnode_id in area_pathnodes:
-			var pathnode: FlowAIPathNode = flow_controller.all_pathnodes.get(pathnode_id - 1)
+		for pathnode_id in a_pathnodes_list:
+			var pathnode:FlowAIPathNode = flow_controller.controller_pathnodes[pathnode_id]
 			
-			if pathnode and not pathnode.links.is_empty():
-				for link_id in pathnode.links:
-					var index = link_id - 1
-					if index >= 0 and index < flow_controller.all_pathnodes.size():
-						var next_pathnode = flow_controller.all_pathnodes[index]
+			if pathnode and not pathnode.p_links.is_empty():
+				for link_id in pathnode.p_links:
+					var next_pathnode = flow_controller.controller_pathnodes[link_id]
+					if next_pathnode:
+						m_line_immediate.surface_set_color(line_color)
+						m_line_immediate.surface_add_vertex(pathnode.global_position)
 						
-						if next_pathnode:
-							m_line_immediate.surface_set_color(line_color)
-							m_line_immediate.surface_add_vertex(pathnode.global_position)
-							
-							m_line_immediate.surface_set_color(line_color)
-							m_line_immediate.surface_add_vertex(next_pathnode.global_position)
-							
-							vertex_count += 2
+						m_line_immediate.surface_set_color(line_color)
+						m_line_immediate.surface_add_vertex(next_pathnode.global_position)
+						
+						vertex_count += 2
 		
 		if vertex_count > 0:
 			if m_line_mesh.get_surface_override_material_count() > 0:
@@ -79,6 +76,6 @@ func _process(delta: float) -> void:
 
 #region SIGNALS
 func _on_node_tree_exiting():
-	if flow_controller.all_areas.has(self):
-		flow_controller.all_areas.erase(self)
+	if flow_controller.controller_areas.has(self):
+		flow_controller.controller_areas.erase(self)
 #endregion

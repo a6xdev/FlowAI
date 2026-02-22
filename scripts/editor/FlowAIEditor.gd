@@ -5,105 +5,97 @@ func _can_handle(object) -> bool:
 
 func _parse_begin(object):
 	if object is FlowAIController:
-		var save_resource_btn := Button.new()
-		var load_resource_btn := Button.new()
-		var add_area_btn := Button.new()
-		
-		load_resource_btn.text = "Load Data"
-		add_area_btn.text = "Add Area"
-		
-		# Save current data
-		save_resource_btn.pressed.connect(func():
-			object.save_data()
-			)
-			
-		# Load current data
-		load_resource_btn.pressed.connect(func():
-			object.data_loaded = false
-			object.load_data()
-			)
-		
-		# Create Area
-		add_area_btn.pressed.connect(func():
-			var new_area = object.create_area()
-			if Engine.is_editor_hint():
-				EditorInterface.edit_node(new_area)
-		)
-		
-		add_custom_control(save_resource_btn)
-		add_custom_control(load_resource_btn)
-		add_custom_control(add_area_btn)
-	
+		_parser_controller(object)
 	elif object is FlowAIAreaNode:
-		var add_pathnode_btn := Button.new()
-		var snap_all_pahtnodes_to_ground := Button.new()
+		_parser_area(object)
+	elif object is FlowAIPathNode:
+		_parser_pathnode(object)
+
+#region CALLS
+func _parser_controller(controller:FlowAIController) -> void:
+	var add_area_btn := Button.new()
+	add_area_btn.text = "Add Area"
+
+	# Add new area
+	add_area_btn.pressed.connect(func():
+		var new_area = controller._editor_add_area()
+		if Engine.is_editor_hint():
+			EditorInterface.edit_node(new_area)
+	)
+	
+	add_custom_control(add_area_btn)
+
+func _parser_area(area:FlowAIAreaNode) -> void:
+		var _btn_add_new_pathnode := Button.new()
+		var _btr_snap_all_pahtnodes_to_ground := Button.new()
 		
-		# Create Pathnode
-		add_pathnode_btn.text = "Add PathNode"
-		snap_all_pahtnodes_to_ground.text = "Snap All Pathnodes to Ground"
+		_btn_add_new_pathnode.text = "Add PathNode"
+		_btr_snap_all_pahtnodes_to_ground.text = "Snap All Pathnodes to Ground"
 		
-		add_pathnode_btn.pressed.connect(func():
-			var new_pathnode = object.flow_controller.create_pathnode(object)
+		_btn_add_new_pathnode.pressed.connect(func():
+			var new_pathnode = area.flow_controller._editor_add_pathnode(area)
 			if Engine.is_editor_hint():
 				EditorInterface.edit_node(new_pathnode)
 			)
 		
-		snap_all_pahtnodes_to_ground.pressed.connect(func():
-			for node in object.get_children():
+		_btr_snap_all_pahtnodes_to_ground.pressed.connect(func():
+			for node in area.get_children():
 				if node is FlowAIPathNode:
 					node._snap_to_ground()
 			)
 		
-		add_custom_control(add_pathnode_btn)
-		add_custom_control(snap_all_pahtnodes_to_ground)
-	
-	elif object is FlowAIPathNode:
-		var pathnode_id = object.ID
-		var pathnode_links = object.links
-		var controller:FlowAIController = object.flow_controller
-		var area:FlowAIAreaNode = controller.all_areas[object.areaID - 1]
-		var prev:FlowAIPathNode = controller.all_pathnodes[object.prev_pathnode - 1] if area.area_pathnodes.size() != 1 else null
+		add_custom_control(_btn_add_new_pathnode)
+		add_custom_control(_btr_snap_all_pahtnodes_to_ground)
+
+func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
+		var pathnode_id = pathnode.p_id
+		var pathnode_links = pathnode.p_links
+		var controller:FlowAIController = pathnode.flow_controller
+		var area_id = pathnode.p_area_id
+		var area:FlowAIAreaNode = controller.controller_areas[area_id - 1]
+		var prev:FlowAIPathNode = controller.controller_pathnodes[pathnode.p_prev_pathnode] if pathnode.p_prev_pathnode != "" else null
 		
 		# Inspector UI
-		var add_next_pathnode := Button.new()
-		var snap_to_ground := Button.new()
-		var pathnode_id_label := Label.new()
-		var pathnode_area_owner_label := Label.new()
-		var pathnode_prev_label := Label.new()
+		var _btn_add_next_pathnode := Button.new()
+		var _btn_snap_to_ground := Button.new()
+		var _label_pathnode_id := Label.new()
+		var _label_pathnode_area_owner := Label.new()
+		var _label_pathnode_prev := Label.new()
 		
-		var links_list_title := Label.new()
-		var links_list_vertical := VBoxContainer.new()
+		var _label_links_list_title := Label.new()
+		var _vbox_links_list_vertical := VBoxContainer.new()
 		
-		add_next_pathnode.text = "Add Next Pathnode"
-		snap_to_ground.text = "Snap to Ground"
-		pathnode_id_label.text = "PathnodeID: " + str(pathnode_id)
-		pathnode_area_owner_label.text = "AreaID: " + str(object.areaID)
-		pathnode_prev_label.text = "Previous PathNode: " + str(prev.name) if object.ID != 1 and area.area_pathnodes.size() > 1 else "Previous Pathnode: Nil"
-		links_list_title.text = "Links: [Array] - " + str(pathnode_links.size())
+		_btn_add_next_pathnode.text = "Add Next Pathnode"
+		_btn_snap_to_ground.text = "Snap to Ground"
+		_label_pathnode_id.text = "PathnodeID: " + str(pathnode_id)
+		_label_pathnode_area_owner.text = "AreaID: " + str(area_id)
+		_label_pathnode_prev.text = "Previous PathNode: " + str(prev.name) if pathnode.p_id != "" and area.a_pathnodes_list.size() > 1 else "Previous Pathnode: Nil"
+		_label_links_list_title.text = "Links: [Array] - " + str(pathnode_links.size())
 		
 		# Logic to show all nodes that are linked to the selected pathnode
 		for id in pathnode_links:
-			var pathnode = controller.all_pathnodes[id - 1]
+			var pathnode_link = controller.controller_pathnodes[id]
 			if pathnode != null:
 				var pathnode_label := Label.new()
 				pathnode_label.text = "  >  " + "[" + str(id) + "]:  " + str(pathnode.name)
-				links_list_vertical.add_child(pathnode_label)
+				_vbox_links_list_vertical.add_child(pathnode_label)
 		
 		# To create a new pathnode that will be automatically connected to the selected pathnode.
-		add_next_pathnode.pressed.connect(func():
-			var new_pathnode = controller.create_pathnode(area, object, {})
+		_btn_add_next_pathnode.pressed.connect(func():
+			var new_pathnode = controller._editor_add_pathnode(area, pathnode)
 			if Engine.is_editor_hint():
 				EditorInterface.edit_node(new_pathnode)
 			)
 		
-		snap_to_ground.pressed.connect(func():
-			object._snap_to_ground()
+		_btn_snap_to_ground.pressed.connect(func():
+			pathnode._snap_to_ground()
 			)
 		
-		add_custom_control(pathnode_id_label)
-		add_custom_control(pathnode_area_owner_label)
-		add_custom_control(pathnode_prev_label)
-		add_custom_control(links_list_title)
-		add_custom_control(links_list_vertical)
-		add_custom_control(add_next_pathnode)
-		add_custom_control(snap_to_ground)
+		add_custom_control(_label_pathnode_id)
+		add_custom_control(_label_pathnode_area_owner)
+		add_custom_control(_label_pathnode_prev)
+		add_custom_control(_label_links_list_title)
+		add_custom_control(_vbox_links_list_vertical)
+		add_custom_control(_btn_add_next_pathnode)
+		add_custom_control(_btn_snap_to_ground)
+#endregion
