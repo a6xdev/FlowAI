@@ -70,8 +70,8 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 	return new_pathnode
 
 func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
-	if not from.p_links.has(to.p_id):
-		from.p_links.append(to.p_id)
+	if not from.p_data.p_links.has(to.p_data.p_id):
+		from.p_data.p_links.append(to.p_data.p_id)
 
 func _check_and_return_null_id_in_controller_pathnodes(area_owner:FlowAIAreaNode) -> String:
 	var _to_check_value = str(area_owner.a_data.a_id) + "_" + str(area_owner.a_pathnodes_list.size())

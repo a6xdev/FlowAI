@@ -5,4 +5,4 @@ class_name FlowAIPathNodeData
 @export var p_astar_id:int = 0
 @export var p_area_id:int = 0
 @export var p_prev_pathnode:String = ""
-@export var p_links:Array[String] = []
+@export var p_links:Array = []
