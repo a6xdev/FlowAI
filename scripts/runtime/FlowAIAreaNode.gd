@@ -9,15 +9,15 @@ class_name FlowAIAreaNode
 @export_group("Debug")
 @export var line_color:Color = Color(0, 1, 0)
 
-var a_id:int = 0 ## My Unique ID :0
+@export var a_id:int = 0
 
 var m_line_mesh:MeshInstance3D = null
 var m_line_immediate:ImmediateMesh = null
 var m_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
-func _ready() -> void:
-	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines: 
+func _enter_tree() -> void:
+	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines:
 		m_line_mesh = MeshInstance3D.new()
 		m_line_immediate = ImmediateMesh.new()
 		m_material = StandardMaterial3D.new()
@@ -30,12 +30,8 @@ func _ready() -> void:
 		m_line_mesh.mesh = m_line_immediate
 		add_child(m_line_mesh)
 	
-	tree_exiting.connect(_on_node_tree_exiting)
-
-func _exit_tree() -> void:
-	if m_line_mesh: m_line_mesh.queue_free()
-	m_line_immediate = null
-	m_material = null
+	if not is_connected("tree_exiting", _on_node_tree_exiting):
+		tree_exiting.connect(_on_node_tree_exiting)
 
 func _process(delta: float) -> void:
 	if (not Engine.is_editor_hint() or not flow_controller.show_pathnode_lines) and not m_line_immediate:
@@ -76,6 +72,11 @@ func _process(delta: float) -> void:
 
 #region SIGNALS
 func _on_node_tree_exiting():
-	if flow_controller.controller_areas.has(self):
-		flow_controller.controller_areas.erase(self)
+	if self.is_queued_for_deletion():
+		if m_line_mesh: m_line_mesh.queue_free()
+		m_line_immediate = null
+		m_material = null
+	
+		if flow_controller.controller_areas.has(self):
+			flow_controller.controller_areas.erase(self)
 #endregion

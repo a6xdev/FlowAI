@@ -6,7 +6,7 @@ class_name FlowAIController
 ## A node to facilitate the creation of new areas and pathnodes.
 
 @export_file("*json") var data
-@export var controller_areas:Array[FlowAIAreaNode] = []
+@export var controller_areas:Dictionary[int, FlowAIAreaNode] = {}
 @export var controller_pathnodes:Dictionary[String, FlowAIPathNode] = {}
 
 @export_group("Debug")
@@ -16,9 +16,15 @@ class_name FlowAIController
 
 var current_astar:AStar3D = null
 
+var _m_is_scene_shutting_down:bool = false
+
 #region GODOT FUNCTIONS
 func _enter_tree() -> void:
 	add_to_group("FlowAIController")
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
+		_m_is_scene_shutting_down = true
 #endregion
 
 #region [EDITOR] CALLS
@@ -28,10 +34,11 @@ func _editor_add_area() -> FlowAIAreaNode:
 	add_child(new_area)
 	new_area.owner = get_tree().edited_scene_root
 	
-	var id:int = controller_areas.size() if not controller_pathnodes.is_empty() else 1
-	new_area.a_id = id
-	new_area.name = "area_" + str(id)
-	controller_areas.append(new_area)
+	var unique_id:int = controller_areas.size() if not controller_pathnodes.is_empty() else 1
+	var unique_name:String = "area_" + str(unique_id)
+	new_area.a_id = unique_id
+	new_area.name = "area_" + str(unique_id)
+	controller_areas[unique_id] = new_area
 	return new_area
 
 func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNode = null) -> FlowAIPathNode:
@@ -74,6 +81,9 @@ func _check_and_return_null_id_in_controller_pathnodes(area_owner:FlowAIAreaNode
 			return id
 	
 	return _to_check_value
+
+func _is_scene_shutting_down() -> bool:
+	return _m_is_scene_shutting_down
 #endregion
 
 #region [RUNTIME] CALLS

@@ -7,11 +7,11 @@ class_name FlowAIPathNode
 @export var weight_scale_base:float = 1.0
 @export var flow_controller:FlowAIController = null # Dont care if it.
 
-var p_id:String = ""
-var p_astar_id:int = 0
-var p_area_id:int = 0
-var p_prev_pathnode:String = ""
-var p_links:Array[String] = []
+@export var p_id:String = ""
+@export var p_astar_id:int = 0
+@export var p_area_id:int = 0
+@export var p_prev_pathnode:String = ""
+@export var p_links:Array[String] = []
 
 var m_agents:Array[FlowAIAgent3D] = []
 var weight_multiplier = 1.5
@@ -49,10 +49,6 @@ func _enter_tree() -> void:
 	
 	add_child(_debug_pathnode_visualize_mesh)
 	add_child(_debug_pathnode_name_label)
-	
-func _exit_tree() -> void:
-	_debug_pathnode_visualize_mesh.queue_free()
-	_debug_mesh_material = null
 #endregion
 
 #region PLUGIN CALLS
@@ -99,16 +95,23 @@ func get_pathnode_area_id() -> int:
 
 #region SIGNALS
 func _on_node_tree_exiting():
-	if Engine.is_editor_hint():
+	if self.is_queued_for_deletion():
+		_debug_pathnode_visualize_mesh.queue_free()
+		_debug_mesh_material = null
+	
 		if flow_controller.controller_pathnodes.size() > 0:
-			var area:FlowAIAreaNode = flow_controller.controller_areas[p_area_id - 1]
-			var prev:FlowAIPathNode = flow_controller.controller_pathnodes[p_prev_pathnode]
-			
 			flow_controller.controller_pathnodes[p_id] = null
 			
-			if prev.p_links.has(p_id):
-				prev.p_links.erase(p_id)
-			
-			if area.a_pathnodes_list.has(p_id):
+			print("test_001")
+			var area:FlowAIAreaNode = flow_controller.controller_areas[p_area_id]
+			if area and area.a_pathnodes_list.has(p_id):
 				area.a_pathnodes_list.erase(p_id)
+			
+			print("test_002")
+			if p_prev_pathnode != "":
+				var prev:FlowAIPathNode = flow_controller.controller_pathnodes[p_prev_pathnode]
+				if prev and prev.p_links.has(p_id):
+					prev.p_links.erase(p_id)
+			print("test_003")
+			
 #endregion

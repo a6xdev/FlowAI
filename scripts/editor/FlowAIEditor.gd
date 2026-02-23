@@ -52,7 +52,7 @@ func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
 		var pathnode_links = pathnode.p_links
 		var controller:FlowAIController = pathnode.flow_controller
 		var area_id = pathnode.p_area_id
-		var area:FlowAIAreaNode = controller.controller_areas[area_id - 1]
+		var area:FlowAIAreaNode = controller.controller_areas[area_id]
 		var prev:FlowAIPathNode = controller.controller_pathnodes[pathnode.p_prev_pathnode] if pathnode.p_prev_pathnode != "" else null
 		
 		# Inspector UI
@@ -69,7 +69,7 @@ func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
 		_btn_snap_to_ground.text = "Snap to Ground"
 		_label_pathnode_id.text = "PathnodeID: " + str(pathnode_id)
 		_label_pathnode_area_owner.text = "AreaID: " + str(area_id)
-		_label_pathnode_prev.text = "Previous PathNode: " + str(prev.name) if pathnode.p_id != "" and area.a_pathnodes_list.size() > 1 else "Previous Pathnode: Nil"
+		_label_pathnode_prev.text = "Previous PathNode: " + str(prev.name) if prev else "Previous Pathnode: Nil"
 		_label_links_list_title.text = "Links: [Array] - " + str(pathnode_links.size())
 		
 		# Logic to show all nodes that are linked to the selected pathnode
