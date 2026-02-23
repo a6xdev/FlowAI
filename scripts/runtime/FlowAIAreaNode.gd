@@ -3,13 +3,12 @@
 extends Node3D
 class_name FlowAIAreaNode
 
-@export var flow_controller:FlowAIController = null
+@export var a_data:FlowAIAreaData = null
+@export var a_flow_controller:FlowAIController = null
 @export var a_pathnodes_list:Array[String] = []
 
 @export_group("Debug")
 @export var line_color:Color = Color(0, 1, 0)
-
-@export var a_id:int = 0
 
 var m_line_mesh:MeshInstance3D = null
 var m_line_immediate:ImmediateMesh = null
@@ -17,7 +16,7 @@ var m_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _enter_tree() -> void:
-	if Engine.is_editor_hint() or flow_controller.show_pathnode_lines:
+	if Engine.is_editor_hint() or a_flow_controller.show_pathnode_lines:
 		m_line_mesh = MeshInstance3D.new()
 		m_line_immediate = ImmediateMesh.new()
 		m_material = StandardMaterial3D.new()
@@ -34,22 +33,22 @@ func _enter_tree() -> void:
 		tree_exiting.connect(_on_node_tree_exiting)
 
 func _process(delta: float) -> void:
-	if (not Engine.is_editor_hint() or not flow_controller.show_pathnode_lines) and not m_line_immediate:
+	if (not Engine.is_editor_hint() or not a_flow_controller.show_pathnode_lines) and not m_line_immediate:
 		return
 	
 	if m_line_immediate: m_line_immediate.clear_surfaces()
 	
-	if flow_controller.show_pathnode_lines:
+	if a_flow_controller.show_pathnode_lines:
 		var vertex_count = 0
 		m_line_mesh.global_transform = Transform3D.IDENTITY
 		m_line_immediate.surface_begin(Mesh.PRIMITIVE_LINES)
 
 		for pathnode_id in a_pathnodes_list:
-			var pathnode:FlowAIPathNode = flow_controller.controller_pathnodes[pathnode_id]
+			var pathnode:FlowAIPathNode = a_flow_controller.controller_pathnodes[pathnode_id]
 			
-			if pathnode and not pathnode.p_links.is_empty():
-				for link_id in pathnode.p_links:
-					var next_pathnode = flow_controller.controller_pathnodes[link_id]
+			if pathnode and not pathnode.p_data.p_links.is_empty():
+				for link_id in pathnode.p_data.p_links:
+					var next_pathnode = a_flow_controller.controller_pathnodes[link_id]
 					if next_pathnode:
 						m_line_immediate.surface_set_color(line_color)
 						m_line_immediate.surface_add_vertex(pathnode.global_position)
@@ -77,6 +76,6 @@ func _on_node_tree_exiting():
 		m_line_immediate = null
 		m_material = null
 	
-		if flow_controller.controller_areas.has(self):
-			flow_controller.controller_areas.erase(self)
+		if a_flow_controller.controller_areas.has(self):
+			a_flow_controller.controller_areas.erase(self)
 #endregion

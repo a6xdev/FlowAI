@@ -5,13 +5,9 @@ class_name FlowAIPathNode
 
 @export var active:bool = true
 @export var weight_scale_base:float = 1.0
-@export var flow_controller:FlowAIController = null # Dont care if it.
 
-@export var p_id:String = ""
-@export var p_astar_id:int = 0
-@export var p_area_id:int = 0
-@export var p_prev_pathnode:String = ""
-@export var p_links:Array[String] = []
+@export var p_data:FlowAIPathNodeData = null
+@export var p_flow_controller:FlowAIController = null # Dont care if it.
 
 var m_agents:Array[FlowAIAgent3D] = []
 var weight_multiplier = 1.5
@@ -25,8 +21,8 @@ var _debug_pathnode_name_label:Label3D = null
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
-	_debug_pathnode_visualize_mesh.visible = true if flow_controller.show_pathnode_shape else false
-	_debug_pathnode_name_label.visible = true if flow_controller.show_pathnode_label else false
+	_debug_pathnode_visualize_mesh.visible = true if p_flow_controller.show_pathnode_shape else false
+	_debug_pathnode_name_label.visible = true if p_flow_controller.show_pathnode_label else false
 	
 	tree_exiting.connect(_on_node_tree_exiting)
 
@@ -65,7 +61,7 @@ func _unregister_agent(agent:FlowAIAgent3D) -> void:
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
 func _reload_weight_scale() -> void:
 	current_weight_scale = weight_scale_base + (m_agents.size() * weight_multiplier)
-	flow_controller.current_astar.set_point_weight_scale(p_astar_id, current_weight_scale)
+	p_flow_controller.current_astar.set_point_weight_scale(p_data.p_astar_id, current_weight_scale)
 	
 	if current_weight_scale == weight_scale_base:
 		_debug_mesh_material.albedo_color = Color(1, 1, 1)
@@ -87,10 +83,10 @@ func _snap_to_ground() -> void:
 
 #region CALLS
 func get_pathnode_id() -> String:
-	return p_id
+	return p_data.p_id
 
 func get_pathnode_area_id() -> int:
-	return p_area_id
+	return p_data.p_area_id
 #endregion
 
 #region SIGNALS
@@ -99,19 +95,15 @@ func _on_node_tree_exiting():
 		_debug_pathnode_visualize_mesh.queue_free()
 		_debug_mesh_material = null
 	
-		if flow_controller.controller_pathnodes.size() > 0:
-			flow_controller.controller_pathnodes[p_id] = null
+		if p_flow_controller.controller_pathnodes.size() > 0:
+			p_flow_controller.controller_pathnodes[p_data.p_id] = null
 			
-			print("test_001")
-			var area:FlowAIAreaNode = flow_controller.controller_areas[p_area_id]
-			if area and area.a_pathnodes_list.has(p_id):
-				area.a_pathnodes_list.erase(p_id)
+			var area:FlowAIAreaNode = p_flow_controller.controller_areas[p_data.p_area_id]
+			if area and area.a_pathnodes_list.has(p_data.p_id):
+				area.a_pathnodes_list.erase(p_data.p_id)
 			
-			print("test_002")
-			if p_prev_pathnode != "":
-				var prev:FlowAIPathNode = flow_controller.controller_pathnodes[p_prev_pathnode]
-				if prev and prev.p_links.has(p_id):
-					prev.p_links.erase(p_id)
-			print("test_003")
-			
+			if p_data.p_prev_pathnode != "":
+				var prev:FlowAIPathNode = p_flow_controller.controller_pathnodes[p_data.p_prev_pathnode]
+				if prev and prev.p_data.p_links.has(p_data.p_id):
+					prev.p_links.erase(p_data.p_id)
 #endregion

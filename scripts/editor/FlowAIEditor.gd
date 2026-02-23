@@ -33,7 +33,7 @@ func _parser_area(area:FlowAIAreaNode) -> void:
 		_btr_snap_all_pahtnodes_to_ground.text = "Snap All Pathnodes to Ground"
 		
 		_btn_add_new_pathnode.pressed.connect(func():
-			var new_pathnode = area.flow_controller._editor_add_pathnode(area)
+			var new_pathnode = area.a_flow_controller._editor_add_pathnode(area)
 			if Engine.is_editor_hint():
 				EditorInterface.edit_node(new_pathnode)
 			)
@@ -48,12 +48,12 @@ func _parser_area(area:FlowAIAreaNode) -> void:
 		add_custom_control(_btr_snap_all_pahtnodes_to_ground)
 
 func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
-		var pathnode_id = pathnode.p_id
-		var pathnode_links = pathnode.p_links
-		var controller:FlowAIController = pathnode.flow_controller
-		var area_id = pathnode.p_area_id
+		var pathnode_id = pathnode.p_data.p_id
+		var pathnode_links = pathnode.p_data.p_links
+		var controller:FlowAIController = pathnode.p_flow_controller
+		var area_id = pathnode.p_data.p_area_id
 		var area:FlowAIAreaNode = controller.controller_areas[area_id]
-		var prev:FlowAIPathNode = controller.controller_pathnodes[pathnode.p_prev_pathnode] if pathnode.p_prev_pathnode != "" else null
+		var prev:FlowAIPathNode = controller.controller_pathnodes[pathnode.p_data.p_prev_pathnode] if pathnode.p_data.p_prev_pathnode != "" else null
 		
 		# Inspector UI
 		var _btn_add_next_pathnode := Button.new()

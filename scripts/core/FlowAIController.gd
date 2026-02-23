@@ -30,13 +30,15 @@ func _notification(what: int) -> void:
 #region [EDITOR] CALLS
 func _editor_add_area() -> FlowAIAreaNode:
 	var new_area := FlowAIAreaNode.new()
-	new_area.flow_controller = self
+	var new_data := FlowAIAreaData.new()
+	new_area.a_data = new_data
+	new_area.a_flow_controller = self
 	add_child(new_area)
 	new_area.owner = get_tree().edited_scene_root
 	
 	var unique_id:int = controller_areas.size() if not controller_pathnodes.is_empty() else 1
 	var unique_name:String = "area_" + str(unique_id)
-	new_area.a_id = unique_id
+	new_area.a_data.a_id = unique_id
 	new_area.name = "area_" + str(unique_id)
 	controller_areas[unique_id] = new_area
 	return new_area
@@ -46,23 +48,22 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 		return
 	
 	var new_pathnode := FlowAIPathNode.new()
-	new_pathnode.flow_controller = self
+	var new_data := FlowAIPathNodeData.new()
+	new_pathnode.p_data = new_data
+	new_pathnode.p_flow_controller = self
 	area_owner.add_child(new_pathnode)
 	new_pathnode.owner = get_tree().edited_scene_root
 	
-	var _check_value = _check_and_return_null_id_in_controller_pathnodes(area_owner)
-	print("_check_value: ", _check_value)
-	
-	var unique_id:String = _check_value
+	var unique_id:String = _check_and_return_null_id_in_controller_pathnodes(area_owner)
 	var unique_name:String = "pathnode_" + unique_id
-	new_pathnode.p_id = unique_id
-	new_pathnode.p_area_id = area_owner.a_id
+	new_pathnode.p_data.p_id = unique_id
+	new_pathnode.p_data.p_area_id = area_owner.a_data.a_id
 	new_pathnode.name = unique_name
 	new_pathnode._debug_pathnode_name_label.text = unique_name
 	
 	if prev_pathnode:
-		new_pathnode.p_prev_pathnode = prev_pathnode.p_id
-		prev_pathnode.p_links.append(unique_id)
+		new_pathnode.p_data.p_prev_pathnode = prev_pathnode.p_data.p_id
+		prev_pathnode.p_data.p_links.append(unique_id)
 		new_pathnode.global_position = prev_pathnode.global_position
 	
 	area_owner.a_pathnodes_list.append(unique_id)
@@ -74,7 +75,7 @@ func connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 		from.p_links.append(to.p_id)
 
 func _check_and_return_null_id_in_controller_pathnodes(area_owner:FlowAIAreaNode) -> String:
-	var _to_check_value = str(area_owner.a_id) + "_" + str(area_owner.a_pathnodes_list.size())
+	var _to_check_value = str(area_owner.a_data.a_id) + "_" + str(area_owner.a_pathnodes_list.size())
 	
 	for id in controller_pathnodes:
 		if controller_pathnodes[id] == null:
