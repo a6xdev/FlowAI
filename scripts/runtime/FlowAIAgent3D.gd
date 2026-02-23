@@ -18,7 +18,7 @@ var current_area:FlowAIAreaNode = null
 
 var previous_target:FlowAIPathNode = null
 
-@export var desired_area_id:int = 0 ## ID of the desired area
+@export var desired_area_id:int = 1 ## ID of the desired area
 
 #region GODOT FUNCTIONS
 func _ready() -> void:
@@ -43,18 +43,18 @@ func _ready() -> void:
 	if not flowai_controller:
 		printerr("FlowAIAgent3D - There are no FLowAIController in the current scene")
 	
-	current_astar = flowai_controller.create_astar()
+	current_astar = flowai_controller._runtime_create_astar()
 	
 	# Get nearby areas
-	if flowai_controller.all_areas.is_empty():
+	if flowai_controller.controller_areas.is_empty():
 		printerr("FlowAIAgent3D - There are no areas in FlowAIController")
 		get_tree().quit()
 	
 	# Get Area
-	current_area = flowai_controller.all_areas[desired_area_id]
+	current_area = flowai_controller.controller_areas[desired_area_id]
 	
-	for pathnode_id in current_area.area_pathnodes:
-		var pathnode = flowai_controller.all_pathnodes[pathnode_id - 1]
+	for pathnode_id in current_area.a_pathnodes_list:
+		var pathnode = flowai_controller.controller_pathnodes[pathnode_id]
 		a_pathnodes.append(pathnode)
 
 func _process(delta: float) -> void:

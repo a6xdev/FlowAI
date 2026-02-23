@@ -34,8 +34,8 @@ func _process(delta: float) -> void:
 		var to_node = pathnodes_selected[1]
 		
 		connect_pathnodes_btn.pressed.connect(func():
-			var controller:FlowAIController = from_node.flow_controller
-			controller.connect_nodes(from_node, to_node)
+			var controller:FlowAIController = from_node.p_flow_controller
+			controller._editor_connect_nodes(from_node, to_node)
 			)
 	else:
 		connect_pathnodes_btn.hide()
