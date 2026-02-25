@@ -43,18 +43,20 @@ func _ready() -> void:
 	if not flowai_controller:
 		printerr("FlowAIAgent3D - There are no FLowAIController in the current scene")
 	
+	var controller_areas = flowai_controller._get_areas_list()
 	current_astar = flowai_controller._runtime_create_astar()
 	
 	# Get nearby areas
-	if flowai_controller.controller_areas.is_empty():
+	if controller_areas.is_empty():
 		printerr("FlowAIAgent3D - There are no areas in FlowAIController")
 		get_tree().quit()
 	
 	# Get Area
-	current_area = flowai_controller.controller_areas[desired_area_id]
+	current_area = controller_areas[desired_area_id]
+	var current_area_pathnodes = current_area._get_pathnodes_list()
 	
-	for pathnode_id in current_area.a_pathnodes_list:
-		var pathnode = flowai_controller.controller_pathnodes[pathnode_id]
+	for pathnode_id in current_area_pathnodes:
+		var pathnode = current_area_pathnodes[pathnode_id]
 		a_pathnodes.append(pathnode)
 
 func _process(delta: float) -> void:

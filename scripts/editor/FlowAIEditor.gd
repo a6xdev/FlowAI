@@ -51,9 +51,11 @@ func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
 		var pathnode_id = pathnode.p_data.p_id
 		var pathnode_links = pathnode.p_data.p_links
 		var controller:FlowAIController = pathnode.p_flow_controller
+		var areas_list = controller._get_areas_list()
+		var pathnodes_list = controller._get_pathnodes_list()
 		var area_id = pathnode.p_data.p_area_id
-		var area:FlowAIAreaNode = controller.controller_areas[area_id]
-		var prev:FlowAIPathNode = controller.controller_pathnodes[pathnode.p_data.p_prev_pathnode] if pathnode.p_data.p_prev_pathnode != "" else null
+		var area:FlowAIAreaNode = areas_list[area_id]
+		var prev:FlowAIPathNode = pathnodes_list[pathnode.p_data.p_prev_pathnode] if pathnode.p_data.p_prev_pathnode != "" else null
 		
 		# Inspector UI
 		var _btn_add_next_pathnode := Button.new()
@@ -74,7 +76,7 @@ func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
 		
 		# Logic to show all nodes that are linked to the selected pathnode
 		for id in pathnode_links:
-			var pathnode_link = controller.controller_pathnodes[id]
+			var pathnode_link = pathnodes_list[id]
 			if pathnode != null:
 				var pathnode_label := Label.new()
 				pathnode_label.text = "  >  " + "[" + str(id) + "]:  " + str(pathnode.name)

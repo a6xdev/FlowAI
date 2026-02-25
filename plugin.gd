@@ -2,7 +2,6 @@
 extends EditorPlugin
 
 var flowai_inspector_plugin
-
 var connect_pathnodes_btn := Button.new()
 
 func _enter_tree() -> void:

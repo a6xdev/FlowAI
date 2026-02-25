@@ -23,8 +23,6 @@ var _debug_pathnode_name_label:Label3D = null
 func _ready() -> void:
 	_debug_pathnode_visualize_mesh.visible = true if p_flow_controller.show_pathnode_shape else false
 	_debug_pathnode_name_label.visible = true if p_flow_controller.show_pathnode_label else false
-	
-	tree_exiting.connect(_on_node_tree_exiting)
 
 func _enter_tree() -> void:
 	var mesh := BoxMesh.new()
@@ -45,6 +43,13 @@ func _enter_tree() -> void:
 	
 	add_child(_debug_pathnode_visualize_mesh)
 	add_child(_debug_pathnode_name_label)
+
+func _exit_tree() -> void:
+	var areas_list = p_flow_controller._get_areas_list()
+	var pathnodes_list = p_flow_controller._get_pathnodes_list()
+	
+	_debug_pathnode_visualize_mesh.queue_free()
+	_debug_mesh_material = null
 #endregion
 
 #region PLUGIN CALLS
@@ -90,20 +95,4 @@ func get_pathnode_area_id() -> int:
 #endregion
 
 #region SIGNALS
-func _on_node_tree_exiting():
-	if self.is_queued_for_deletion():
-		_debug_pathnode_visualize_mesh.queue_free()
-		_debug_mesh_material = null
-	
-		if p_flow_controller.controller_pathnodes.size() > 0:
-			p_flow_controller.controller_pathnodes[p_data.p_id] = null
-			
-			var area:FlowAIAreaNode = p_flow_controller.controller_areas[p_data.p_area_id]
-			if area and area.a_pathnodes_list.has(p_data.p_id):
-				area.a_pathnodes_list.erase(p_data.p_id)
-			
-			if p_data.p_prev_pathnode != "":
-				var prev:FlowAIPathNode = p_flow_controller.controller_pathnodes[p_data.p_prev_pathnode]
-				if prev and prev.p_data.p_links.has(p_data.p_id):
-					prev.p_links.erase(p_data.p_id)
 #endregion

@@ -5,9 +5,6 @@ class_name FlowAIController
 
 ## A node to facilitate the creation of new areas and pathnodes.
 
-@export var controller_areas:Dictionary[int, FlowAIAreaNode] = {}
-@export var controller_pathnodes:Dictionary[String, FlowAIPathNode] = {}
-
 @export_group("Debug")
 @export var show_pathnode_shape:bool = false
 @export var show_pathnode_lines:bool = true
@@ -35,11 +32,10 @@ func _editor_add_area() -> FlowAIAreaNode:
 	add_child(new_area)
 	new_area.owner = get_tree().edited_scene_root
 	
-	var unique_id:int = controller_areas.size() if not controller_pathnodes.is_empty() else 1
+	var unique_id:int = _get_unique_area_id()
 	var unique_name:String = "area_" + str(unique_id)
 	new_area.a_data.a_id = unique_id
 	new_area.name = "area_" + str(unique_id)
-	controller_areas[unique_id] = new_area
 	return new_area
 
 func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNode = null) -> FlowAIPathNode:
@@ -53,7 +49,7 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 	area_owner.add_child(new_pathnode)
 	new_pathnode.owner = get_tree().edited_scene_root
 	
-	var unique_id:String = _check_and_return_null_id_in_controller_pathnodes(area_owner)
+	var unique_id:String = _get_available_pathnode_id(area_owner)
 	var unique_name:String = "pathnode_" + unique_id
 	new_pathnode.p_data.p_id = unique_id
 	new_pathnode.p_data.p_area_id = area_owner.a_data.a_id
@@ -62,52 +58,91 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 	
 	if prev_pathnode:
 		new_pathnode.p_data.p_prev_pathnode = prev_pathnode.p_data.p_id
-		prev_pathnode.p_data.p_links.append(unique_id)
 		new_pathnode.global_position = prev_pathnode.global_position
-	
-	area_owner.a_pathnodes_list.append(unique_id)
-	controller_pathnodes[unique_id] = new_pathnode
+		prev_pathnode.p_data.p_links.append(unique_id)
 	return new_pathnode
 
 func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 	if not from.p_data.p_links.has(to.p_data.p_id):
 		from.p_data.p_links.append(to.p_data.p_id)
 
-func _check_and_return_null_id_in_controller_pathnodes(area_owner:FlowAIAreaNode) -> String:
-	var _to_check_value = str(area_owner.a_data.a_id) + "_" + str(area_owner.a_pathnodes_list.size())
+func _get_unique_area_id() -> int:
+	var _current_ids = _get_areas_list().keys()
+	if _current_ids.is_empty():
+		return 1
 	
-	for id in controller_pathnodes:
-		if controller_pathnodes[id] == null:
+	_current_ids.sort()
+	var _max_id = _current_ids.back()
+	var _value = _max_id + 1
+	return _check_and_return_null_id_in_controller_area(_value)
+
+func _get_available_pathnode_id(area_owner: FlowAIAreaNode) -> String:
+	var pathnodes_list = _get_pathnodes_list()
+	var prefix = str(area_owner.a_data.a_id) + "_"
+	var counter = 0
+	
+	while true:
+		var test_id = prefix + str(counter)
+		if not pathnodes_list.has(test_id):
+			return test_id
+		var node_ref = pathnodes_list[test_id]
+		if node_ref == null or not is_instance_valid(node_ref):
+			return test_id
+		
+		counter += 1
+	return ""
+
+func _check_and_return_null_id_in_controller_area(check_id:int) -> int:
+	var areas_list = _get_areas_list()
+	for id in areas_list:
+		if areas_list[id] == null:
 			return id
 	
-	return _to_check_value
-
-func _is_scene_shutting_down() -> bool:
-	return _m_is_scene_shutting_down
+	return check_id
 #endregion
 
 #region [RUNTIME] CALLS
 func _runtime_create_astar() -> AStar3D:
+	var pathnodes_list = _get_pathnodes_list()
 	var new_astar := AStar3D.new()
 	
 	# Add point based on pathnodes on 'controller_pathnodes'
-	for pathnode_id in controller_pathnodes:
-		var point = controller_pathnodes[pathnode_id]
+	for pathnode_id in pathnodes_list:
+		var point = pathnodes_list[pathnode_id]
 		var astar_id = point.get_instance_id()
 		point.p_data.p_astar_id = astar_id
 		new_astar.add_point(astar_id, point.global_position)
 	
 	# Connect the points based on pathnode links
-	for pathnode_id in controller_pathnodes:
-		var point = controller_pathnodes[pathnode_id]
+	for pathnode_id in pathnodes_list:
+		var point = pathnodes_list[pathnode_id]
 		var astar_id_01 = point.get_instance_id()
 		
 		for link_id in point.p_data.p_links:
-			var p_link = controller_pathnodes[link_id]
+			var p_link = pathnodes_list[link_id]
 			var astar_id_02 = p_link.get_instance_id()
 			
 			if not new_astar.are_points_connected(astar_id_01, astar_id_02, true):
 				new_astar.connect_points(astar_id_01, astar_id_02, true)
 	current_astar = new_astar
 	return new_astar
+#endregion
+
+#region IMPORTANT CALLS
+func _get_areas_list() -> Dictionary:
+	var area_list:Dictionary = {}
+	for child in get_children():
+		if child is FlowAIAreaNode:
+			area_list[child.a_data.a_id] = child
+	return area_list
+
+func _get_pathnodes_list() -> Dictionary:
+	var pathnodes_list:Dictionary = {}
+	var areas_list = _get_areas_list()
+	for area_id in areas_list:
+		var area:FlowAIAreaNode = areas_list[area_id]
+		for pathnode in area.get_children():
+			if pathnode is FlowAIPathNode:
+				pathnodes_list[pathnode.p_data.p_id] = pathnode
+	return pathnodes_list
 #endregion
