@@ -5,9 +5,16 @@ class_name FlowAIAreaNode
 
 @export var a_data:FlowAIAreaData = null
 @export var a_flow_controller:FlowAIController = null
+@export var transform_parent: Node3D:
+	set(value):
+		transform_parent = value
+		if transform_parent:
+			_initial_offset = transform_parent.global_transform.affine_inverse() * global_transform
 
 @export_group("Debug")
 @export var line_color:Color = Color(0, 1, 0)
+
+var _initial_offset:Transform3D
 
 var m_line_mesh:MeshInstance3D = null
 var m_line_immediate:ImmediateMesh = null
@@ -36,7 +43,10 @@ func _exit_tree() -> void:
 func _process(delta: float) -> void:
 	var is_in_editor:bool = Engine.is_editor_hint()
 	
-	if is_in_editor: _sanitize_all_links()
+	if is_in_editor: 
+		_sanitize_all_links()
+		if transform_parent and is_instance_valid(transform_parent):
+			global_transform = transform_parent.global_transform * _initial_offset
 	
 	if (not is_in_editor or not a_flow_controller.show_pathnode_lines) and not m_line_immediate:
 		return
