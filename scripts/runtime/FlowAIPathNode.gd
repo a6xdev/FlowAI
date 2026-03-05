@@ -16,14 +16,10 @@ var current_weight_scale:float = 0.0
 # DEBUG - some nodes to a better observe in the scene
 # Just a mesh to better observe the nodes in the scene
 var _debug_pathnode_visualize_mesh:MeshInstance3D = null
-var _debug_mesh_material:StandardMaterial3D = null
 var _debug_pathnode_name_label:Label3D = null
+var _debug_mesh_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
-func _ready() -> void:
-	_debug_pathnode_visualize_mesh.visible = true if p_flow_controller.show_pathnode_shape else false
-	_debug_pathnode_name_label.visible = true if p_flow_controller.show_pathnode_label else false
-
 func _enter_tree() -> void:
 	var mesh := BoxMesh.new()
 	_debug_pathnode_visualize_mesh = MeshInstance3D.new()
@@ -43,16 +39,24 @@ func _enter_tree() -> void:
 	
 	add_child(_debug_pathnode_visualize_mesh)
 	add_child(_debug_pathnode_name_label)
+	
+	_update_debug_options()
 
 func _exit_tree() -> void:
 	var areas_list = p_flow_controller._get_areas_list()
 	var pathnodes_list = p_flow_controller._get_pathnodes_list()
 	
 	_debug_pathnode_visualize_mesh.queue_free()
+	_debug_pathnode_name_label.queue_free()
 	_debug_mesh_material = null
 #endregion
 
 #region PLUGIN CALLS
+func _update_debug_options() -> void:
+	_debug_pathnode_visualize_mesh.visible = true if p_flow_controller.show_pathnode_shape else false
+	_debug_pathnode_name_label.visible = true if p_flow_controller.show_pathnode_label else false
+	_debug_pathnode_name_label.text = "pathnode_" + p_data.p_id
+	
 ## ALERT: Plugin private function. Dont have any reason for you to use that.
 func _register_agent(agent:FlowAIAgent3D) -> void:
 	m_agents.append(agent)

@@ -6,9 +6,15 @@ class_name FlowAIController
 ## A node to facilitate the creation of new areas and pathnodes.
 
 @export_group("Debug")
-@export var show_pathnode_shape:bool = false
 @export var show_pathnode_lines:bool = true
-@export var show_pathnode_label:bool = false
+@export var show_pathnode_shape:bool = true:
+	set(value):
+		show_pathnode_shape = value
+		_notify_all_pathnodes()
+@export var show_pathnode_label:bool = true:
+	set(value):
+		show_pathnode_label = value
+		_notify_all_pathnodes()
 
 var current_astar:AStar3D = null
 
@@ -16,7 +22,8 @@ var _m_is_scene_shutting_down:bool = false
 
 #region GODOT FUNCTIONS
 func _enter_tree() -> void:
-	add_to_group("FlowAIController")
+	if not is_in_group("FlowAIController"):
+		add_to_group("FlowAIController")
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
@@ -65,6 +72,12 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 	if not from.p_data.p_links.has(to.p_data.p_id):
 		from.p_data.p_links.append(to.p_data.p_id)
+
+func _notify_all_pathnodes():
+	var list = _get_pathnodes_list()
+	for pathnode_id in list:
+		var pathnode = list[pathnode_id]
+		pathnode._update_debug_options()
 
 func _get_unique_area_id() -> int:
 	var _current_ids = _get_areas_list().keys()
