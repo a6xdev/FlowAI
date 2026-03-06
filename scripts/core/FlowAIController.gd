@@ -16,6 +16,8 @@ class_name FlowAIController
 		show_pathnode_label = value
 		_notify_all_pathnodes()
 
+var _m_all_agents:Array[FlowAIAgent3D] = []
+
 var current_astar:AStar3D = null
 
 var _m_is_scene_shutting_down:bool = false
@@ -139,6 +141,18 @@ func _runtime_create_astar() -> AStar3D:
 				new_astar.connect_points(astar_id_01, astar_id_02, true)
 	current_astar = new_astar
 	return new_astar
+
+func _runtime_register_agent(agent:FlowAIAgent3D) -> void:
+	if not _m_all_agents.has(agent):
+		_m_all_agents.append(agent)
+
+func _runtime_get_nearby_agents(origin:Vector3, radius:float) -> Array[FlowAIAgent3D]:
+	var nearby:Array[FlowAIAgent3D] = []
+	var radius_squared = radius
+	for agent in _m_all_agents:
+		if origin.distance_squared_to(agent.parent_character_body.global_position) <= radius_squared:
+			nearby.append(agent)
+	return nearby
 #endregion
 
 #region IMPORTANT CALLS

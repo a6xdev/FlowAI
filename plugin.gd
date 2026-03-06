@@ -8,10 +8,14 @@ func _enter_tree() -> void:
 	flowai_inspector_plugin = preload("res://addons/FlowAI/scripts/editor/FlowAIEditor.gd").new()
 	connect_pathnodes_btn.text = "Connect Pathnodes"
 	
+	add_autoload_singleton("FlowAIDebugDraw", "res://addons/FlowAI/scripts/debug/DebugDraw3D.gd")
+	
 	add_inspector_plugin(flowai_inspector_plugin)
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, connect_pathnodes_btn)
 
 func _exit_tree() -> void:
+	remove_autoload_singleton("FlowAIDebugDraw")
+	
 	remove_inspector_plugin(flowai_inspector_plugin)
 	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, connect_pathnodes_btn)
 	
