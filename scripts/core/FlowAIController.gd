@@ -3,33 +3,26 @@
 extends Node
 class_name FlowAIController
 
-## A node to facilitate the creation of new areas and pathnodes.
-
 @export_group("Debug")
-@export var show_pathnode_lines:bool = true
-@export var show_pathnode_shape:bool = true:
+@export var show_pathnode_lines:bool = true ## Toggles the visibility of connection lines between pathnodes in the editor.
+@export var show_pathnode_shape:bool = true: ## Toggles the visibility of the pathnode's physical mesh/gizmo.
 	set(value):
 		show_pathnode_shape = value
 		_notify_all_pathnodes()
-@export var show_pathnode_label:bool = true:
+@export var show_pathnode_label:bool = true: ## Displays floating labels with ID and metadata for each pathnode.
 	set(value):
 		show_pathnode_label = value
 		_notify_all_pathnodes()
 
-var _m_all_agents:Array[FlowAIAgent3D] = []
-
 var current_astar:AStar3D = null
 
-var _m_is_scene_shutting_down:bool = false
+var _m_all_agents:Array[FlowAIAgent3D] = []
 
 #region GODOT FUNCTIONS
 func _enter_tree() -> void:
+	# This is necessary so that the FlowAIAgent can find this node.
 	if not is_in_group("FlowAIController"):
 		add_to_group("FlowAIController")
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
-		_m_is_scene_shutting_down = true
 #endregion
 
 #region [EDITOR] CALLS
@@ -75,13 +68,13 @@ func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 	if not from.p_data.p_links.has(to.p_data.p_id):
 		from.p_data.p_links.append(to.p_data.p_id)
 
-func _notify_all_pathnodes():
+func _notify_all_pathnodes(): ## Update the pathnode debug
 	var list = _get_pathnodes_list()
 	for pathnode_id in list:
 		var pathnode = list[pathnode_id]
 		pathnode._update_debug_options()
 
-func _get_unique_area_id() -> int:
+func _get_unique_area_id() -> int: # Get a cool ID to add a new area in the editor
 	var _current_ids = _get_areas_list().keys()
 	if _current_ids.is_empty():
 		return 1
@@ -91,7 +84,7 @@ func _get_unique_area_id() -> int:
 	var _value = _max_id + 1
 	return _check_and_return_null_id_in_controller_area(_value)
 
-func _get_available_pathnode_id(area_owner: FlowAIAreaNode) -> String:
+func _get_available_pathnode_id(area_owner: FlowAIAreaNode) -> String: # Get a cool and free ID to add new pathnode in the editor lol
 	var pathnodes_list = _get_pathnodes_list()
 	var prefix = str(area_owner.a_data.a_id) + "_"
 	var counter = 0
@@ -107,7 +100,7 @@ func _get_available_pathnode_id(area_owner: FlowAIAreaNode) -> String:
 		counter += 1
 	return ""
 
-func _check_and_return_null_id_in_controller_area(check_id:int) -> int:
+func _check_and_return_null_id_in_controller_area(check_id:int) -> int: # Check if the area ID is valid
 	var areas_list = _get_areas_list()
 	for id in areas_list:
 		if areas_list[id] == null:

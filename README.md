@@ -20,6 +20,9 @@ Once enabled, four new nodes will be available:
 - *FlowAIPathnode*: Individual points in your graph. They store link data, previous nodes, and Area ownership. You can easily branch paths by creating new nodes that inherit the properties of the selected one.
 - *FlowAIAgent3D*: The component added as a child of your ``CharacterBody3D`` to handle movement logic and path requests.
 
+> [!TIP]
+> Quick Linking: You can connect two existing pathnodes by selecting both in the SceneTree (Hold Ctrl). A "Link Pathnodes" button will appear in the 3D viewport toolbar for instant connection.
+
 ## Moving the Agent
 In your ``CharacterBody3D`` script, you can implement random wandering or set specific targets:
 

@@ -3,9 +3,7 @@
 extends Node3D
 class_name FlowAIAreaNode
 
-@export var a_data:FlowAIAreaData = null
-@export var a_flow_controller:FlowAIController = null
-@export var transform_parent: Node3D:
+@export var transform_parent:Node3D: ## Reference node for relative positioning. If set, the entire area and its nodes will follow this transform.
 	set(value):
 		transform_parent = value
 		if transform_parent:
@@ -13,6 +11,9 @@ class_name FlowAIAreaNode
 
 @export_group("Debug")
 @export var line_color:Color = Color(0, 1, 0)
+@export_group("Private")
+@export var a_data:FlowAIAreaData = null
+@export var a_flow_controller:FlowAIController = null
 
 var _initial_offset:Transform3D
 
@@ -31,7 +32,6 @@ func _enter_tree() -> void:
 		m_material.vertex_color_use_as_albedo = true
 		m_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		
-		#pn_line_mesh.top_level = true
 		m_line_mesh.mesh = m_line_immediate
 		add_child(m_line_mesh)
 
@@ -81,6 +81,7 @@ func _process(delta: float) -> void:
 #endregion
 
 #region CALLS
+# Check if the pathnode links exists, its important to maintain data integrity when switching scenes.
 func _sanitize_all_links() -> void:
 	var area_pathnodes = _get_pathnodes_list()
 	
