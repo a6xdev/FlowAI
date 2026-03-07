@@ -1,36 +1,50 @@
-# FlowAI
+# FlowAI 1.3.0
 
-FlowAI é um plugin movimentação de IA baseado em Areas e PathNodes. Ele permite criar caminhos predefinidos para que a IA possa seguir, oferecendo flexibilidade para jogos com tráfego, pedestres, etc.
+FlowAI is a node-based (Pathnode) navigation plugin for NPCs in Godot 4. Unlike the native NavigationServer, FlowAI provides precise, visual, and manual control over the exact routes and flows your NPCs can follow.
 
-## Features
-- Criação de PathNodes conectáveis entre si.
-- Organização por Áreas, permitindo ativar/desativar regiões para otimizar o desempenho.
-- Sistema de links entre nodes para gerar caminhos dinâmicos.
-- Salvamento e carregamento de dados via JSON.
+Version 1.3.0 introduces a major architectural overhaul, ensuring data stability, reliability, and security. The Debug system has been significantly improved to help visualize and implement Pathnodes, making the plugin more consistent and developer-friendly.
 
 ## Installation
-- Baixe este repositorio e coloque esta pasta em `plugins/`.
-- Vá em `Project Settings > Plugins``` e ative o FlowAI.
-- Um novo nó `FlowAIController` ficará disponível para ser adicionado na cena principal.
+1. Download the repository and copy the flow_ai folder into your project's ``addons`` directory.
 
-## Usage
-Adicionando e selecionando o `FlowAIController` na sua cena, no inspector vai aparecer alguns botões:
-  - Save Data
-  - Load Data
-  - Add Area
+2. Go to ``Project Settings > Plugins`` and enable FlowAI.
 
-Clicando em `Add Area`, vai ser adicionando uma nova area como filho do `FlowAIController`, que vai te permitir organizar seus pathnodes.
+## Core Components
+Once enabled, four new nodes will be available:
 
-Com a Area selecionada, você vai conseguir ver um botão no Inspector chamado `Add Pathnode`. Com ele você pode criar Pathnodes que não estejam conectados com os outros. Você pode mover e fazer o que quiser com ele, pois ele será seu Pathnode inicial.
+- FlowAIController: The central brain of the system. Selecting this node allows you to manage navigation areas via the Inspector. It includes global Debug toggles:
+  - ``show_pathnode_lines``: Visualize connections between nodes.
+  - ``show_pathnode_shape``: Show the physical boundaries of nodes.
+  - ``show_pathnode_label``: Display IDs and metadata in the 3D viewport.
+- *FlowAIArea*: Defines a specific navigation sector or neighborhood. It features quick Pathnode creation and Auto-Snap tools to align nodes to your terrain. It also supports a ``Transform Parent``, allowing the entire navigation graph to follow moving objects like ships or elevators.
+- *FlowAIPathnode*: Individual points in your graph. They store link data, previous nodes, and Area ownership. You can easily branch paths by creating new nodes that inherit the properties of the selected one.
+- *FlowAIAgent3D*: The component added as a child of your ``CharacterBody3D`` to handle movement logic and path requests.
 
-Com o pathnode selecionado, você terá acesso a algumas informações, como o `PathnodeID`, `AreaID` que é o ID da area no qual o pathnode faz parte, `Previous Pathnode` no qual eu vou explicar em breve e tambem vai ter acesso aos Pathnodes que estão linkados com o Pathnode selecionado. Você tambem terá acesso ao botão `Add Next Pathnode` onde você vai conseguir criar um novo pathnode se baseando no pathnode selecionado.
+## Moving the Agent
+In your ``CharacterBody3D`` script, you can implement random wandering or set specific targets:
 
-Quando você utiliza o `Add Next Pathnode`, você está criando um novo pathnode que vai receber a mesma posição e a mesma area do pathnode selecionado. Esse novo pathnode vai receber como valor no `Previous Pathnode` o pathnode que está selecionado.
+```GDScript
+func _ready() -> void:
+    # Starts a random path within the configured area
+    flow_ai_agent.get_random_path()
 
-> [!WARNING]
-> Quando você finalizar o seu progresso, lembre-se de criar um arquivo json no seu projeto e setar o caminho dele no `FlowAIController`, na variavel `Data Path` e depois clicar no botão `Save Data` para que todos os dados do Plugin sejam salvos corretamente. Sei que não é nada intuitivo, mas não pensei em uma forma melhor de fazer isso ainda. Sempre que modificarem `FlowAIController` seja adicionando uma nova area ou um novo pathnode, `SALVEM OS DADOS`
+func _physics_process(delta):
+    # Check if the NPC has reached the end of the current path
+    if flow_ai_agent.is_path_complete():
+        flow_ai_agent.get_random_path()
 
-Com todo os seus dados salvos, vamos criar nosso NPC!
+    # Get the next world position in the calculated path
+    var target_pos = flow_ai_agent.get_next_path_position()
+    var direction = (target_pos - global_position).normalized()
+    
+    velocity = direction * speed
+    move_and_slide()
+```
 
-## Roadmap
-- [ ] 
+Tip: To force an NPC to move to a specific pathnode, use ``flow_ai_agent.set_goal_pathnode(pathnode_target)``.
+
+## Debugging
+FlowAI 1.3.0 includes an integrated debug system to visualize navigation flows in real-time. Make sure to check the Debug Group in the ``FlowAIController`` to see your pathnode network during development.
+
+## Credits
+Internal Debug System: Powered by a modified version of the ``DebugDraw`` utility by *Zylann* [Github](https://github.com/Zylann/godot_debug_draw).
