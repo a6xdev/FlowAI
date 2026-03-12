@@ -80,6 +80,7 @@ func get_random_path() -> void: ## Agent choice a random path from scene.
 	var start_node:FlowAIPathNode = null
 	var min_dist:float = INF
 	
+	_a_path_index = 0
 	_a_is_path_complete = false
 	
 	for node in a_pathnodes:
@@ -97,6 +98,7 @@ func set_goal_pathnode(goal:FlowAIPathNode) -> void: ## Define a FlowAIPathNode 
 	var min_dist:float = INF
 	var start_node:FlowAIPathNode = null
 	
+	_a_path_index = 0
 	_a_is_path_complete = false
 	
 	for node in a_pathnodes:
