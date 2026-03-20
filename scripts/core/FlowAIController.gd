@@ -59,9 +59,13 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 	new_pathnode._debug_pathnode_name_label.text = unique_name
 	
 	if prev_pathnode:
+		var updated_links:Array = prev_pathnode.p_data.p_links.duplicate()
+		
 		new_pathnode.p_data.p_prev_pathnode = prev_pathnode.p_data.p_id
 		new_pathnode.global_position = prev_pathnode.global_position
-		prev_pathnode.p_data.p_links.append(unique_id)
+		updated_links.append(unique_id)
+		
+		prev_pathnode.p_data.p_links = updated_links
 	return new_pathnode
 
 func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
