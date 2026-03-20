@@ -70,7 +70,9 @@ func _editor_add_pathnode(area_owner:FlowAIAreaNode, prev_pathnode:FlowAIPathNod
 
 func _editor_connect_nodes(from:FlowAIPathNode, to:FlowAIPathNode) -> void:
 	if not from.p_data.p_links.has(to.p_data.p_id):
-		from.p_data.p_links.append(to.p_data.p_id)
+		var updated_links:Array = from.p_data.p_links.duplicate()
+		updated_links.append(to.p_data.p_id)
+		from.p_data.p_links = updated_links
 
 func _notify_all_pathnodes(): ## Update the pathnode debug
 	var list = _get_pathnodes_list()
