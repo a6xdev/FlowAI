@@ -171,4 +171,21 @@ func _get_pathnodes_list() -> Dictionary:
 			if pathnode is FlowAIPathNode:
 				pathnodes_list[pathnode.p_data.p_id] = pathnode
 	return pathnodes_list
+
+func get_nearest_pathnode_from_pos(pos:Vector3, area_id:int) -> FlowAIPathNode:
+	var _area_list = _get_areas_list()
+	var area:FlowAIAreaNode = _area_list[area_id]
+	var area_pathnodes_list = area._get_pathnodes_list()
+	var nearest_pathnode:FlowAIPathNode = null
+	var shortest_dist:float = INF
+	
+	if area:
+		for node_id in area_pathnodes_list:
+			var pathnode = area_pathnodes_list[node_id]
+			var dist = pos.distance_to(pathnode.global_position)
+			if dist < shortest_dist:
+				shortest_dist = dist
+				nearest_pathnode = pathnode
+	
+	return nearest_pathnode
 #endregion
