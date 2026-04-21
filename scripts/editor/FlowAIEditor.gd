@@ -79,7 +79,7 @@ func _parser_pathnode(pathnode:FlowAIPathNode) -> void:
 			var pathnode_link = pathnodes_list[id]
 			if pathnode != null:
 				var pathnode_label := Label.new()
-				pathnode_label.text = "  >  " + "[" + str(id) + "]:  " + str(pathnode.name)
+				pathnode_label.text = "  >  " + "[" + str(id) + "]:  " + str(pathnode_link.name)
 				_vbox_links_list_vertical.add_child(pathnode_label)
 		
 		# To create a new pathnode that will be automatically connected to the selected pathnode.
