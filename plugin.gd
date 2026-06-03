@@ -12,8 +12,6 @@ func _enter_tree() -> void:
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, connect_pathnodes_btn)
 
 func _exit_tree() -> void:
-	remove_autoload_singleton("FlowAIDebugDraw")
-	
 	remove_inspector_plugin(flowai_inspector_plugin)
 	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, connect_pathnodes_btn)
 	
