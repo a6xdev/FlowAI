@@ -33,11 +33,6 @@ func _ready() -> void:
 	
 	parent_character_body.visibility_changed.connect(_on_body_visibility_changed)
 	
-	# Get FlowAIController in get_root()
-	# --- Scene
-	# -- FlowAIController
-	# -- Actor : <- Needs to be under FlowAIController
-	
 	var controllers_in_scene = get_tree().get_nodes_in_group("FlowAIController")
 	if controllers_in_scene.size() >= 1:
 		flowai_controller = controllers_in_scene[0] as FlowAIController

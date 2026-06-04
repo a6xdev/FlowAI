@@ -23,17 +23,16 @@ var m_material:StandardMaterial3D = null
 
 #region GODOT FUNCTIONS
 func _enter_tree() -> void:
-	if Engine.is_editor_hint() or a_flow_controller.show_pathnode_lines:
-		m_line_mesh = MeshInstance3D.new()
-		m_line_immediate = ImmediateMesh.new()
-		m_material = StandardMaterial3D.new()
-		
-		m_material.no_depth_test = true
-		m_material.vertex_color_use_as_albedo = true
-		m_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		
-		m_line_mesh.mesh = m_line_immediate
-		add_child(m_line_mesh)
+	m_line_mesh = MeshInstance3D.new()
+	m_line_immediate = ImmediateMesh.new()
+	m_material = StandardMaterial3D.new()
+	
+	m_material.no_depth_test = true
+	m_material.vertex_color_use_as_albedo = true
+	m_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	m_line_mesh.mesh = m_line_immediate
+	add_child(m_line_mesh)
 
 func _exit_tree() -> void:
 	if m_line_mesh: m_line_mesh.queue_free()
